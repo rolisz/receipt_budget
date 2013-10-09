@@ -107,7 +107,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'receipts-app.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'receipts.wsgi.application'
+WSGI_APPLICATION = 'receipts-app.wsgi.application'
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_PATH,'templates')
