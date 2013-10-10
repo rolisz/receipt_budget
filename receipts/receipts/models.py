@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum
 
 
 class Shop(models.Model):
@@ -16,8 +17,13 @@ class Expense(models.Model):
     image = models.ImageField(upload_to='receipts/', null=True, blank=True)
 
     def __unicode__(self):
-        return str(self.date) + " - " +  str(self.total) + " at " +\
+        return str(self.date) + " - " + str(self.total) + " at " +\
                str(self.shop.name)
+
+    def _get_total(self):
+        return self.expenseitem_set.all().aggregate(Sum('price'))['price__sum']
+
+    total = property(_get_total)
 
 
 class ExpenseItem(models.Model):

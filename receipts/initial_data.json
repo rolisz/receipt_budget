@@ -1,0 +1,298 @@
+[
+{
+  "pk": "phq6zj68ynrsaq07y2800z55vov4injf", 
+  "model": "sessions.session", 
+  "fields": {
+    "expire_date": "2013-10-23T10:51:11.828Z", 
+    "session_data": "MWJmYWY1NjRkOTQ5ZTg2NTQxNzRjZmE3OTgzYmJkNzQwNDQ0NTNkZjp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6MX0="
+  }
+},
+{
+  "pk": 1, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_permission", 
+    "name": "Can add permission", 
+    "content_type": 1
+  }
+},
+{
+  "pk": 2, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_permission", 
+    "name": "Can change permission", 
+    "content_type": 1
+  }
+},
+{
+  "pk": 3, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_permission", 
+    "name": "Can delete permission", 
+    "content_type": 1
+  }
+},
+{
+  "pk": 4, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_group", 
+    "name": "Can add group", 
+    "content_type": 2
+  }
+},
+{
+  "pk": 5, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_group", 
+    "name": "Can change group", 
+    "content_type": 2
+  }
+},
+{
+  "pk": 6, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_group", 
+    "name": "Can delete group", 
+    "content_type": 2
+  }
+},
+{
+  "pk": 7, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_user", 
+    "name": "Can add user", 
+    "content_type": 3
+  }
+},
+{
+  "pk": 8, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_user", 
+    "name": "Can change user", 
+    "content_type": 3
+  }
+},
+{
+  "pk": 9, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_user", 
+    "name": "Can delete user", 
+    "content_type": 3
+  }
+},
+{
+  "pk": 10, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_contenttype", 
+    "name": "Can add content type", 
+    "content_type": 4
+  }
+},
+{
+  "pk": 11, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_contenttype", 
+    "name": "Can change content type", 
+    "content_type": 4
+  }
+},
+{
+  "pk": 12, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_contenttype", 
+    "name": "Can delete content type", 
+    "content_type": 4
+  }
+},
+{
+  "pk": 13, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_session", 
+    "name": "Can add session", 
+    "content_type": 5
+  }
+},
+{
+  "pk": 14, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_session", 
+    "name": "Can change session", 
+    "content_type": 5
+  }
+},
+{
+  "pk": 15, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_session", 
+    "name": "Can delete session", 
+    "content_type": 5
+  }
+},
+{
+  "pk": 16, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_site", 
+    "name": "Can add site", 
+    "content_type": 6
+  }
+},
+{
+  "pk": 17, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_site", 
+    "name": "Can change site", 
+    "content_type": 6
+  }
+},
+{
+  "pk": 18, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_site", 
+    "name": "Can delete site", 
+    "content_type": 6
+  }
+},
+{
+  "pk": 19, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_logentry", 
+    "name": "Can add log entry", 
+    "content_type": 7
+  }
+},
+{
+  "pk": 20, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_logentry", 
+    "name": "Can change log entry", 
+    "content_type": 7
+  }
+},
+{
+  "pk": 21, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_logentry", 
+    "name": "Can delete log entry", 
+    "content_type": 7
+  }
+},
+{
+  "pk": 22, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_expense", 
+    "name": "Can add expense", 
+    "content_type": 8
+  }
+},
+{
+  "pk": 23, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_expense", 
+    "name": "Can change expense", 
+    "content_type": 8
+  }
+},
+{
+  "pk": 24, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_expense", 
+    "name": "Can delete expense", 
+    "content_type": 8
+  }
+},
+{
+  "pk": 25, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_category", 
+    "name": "Can add category", 
+    "content_type": 9
+  }
+},
+{
+  "pk": 26, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_category", 
+    "name": "Can change category", 
+    "content_type": 9
+  }
+},
+{
+  "pk": 27, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_category", 
+    "name": "Can delete category", 
+    "content_type": 9
+  }
+},
+{
+  "pk": 28, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "add_expenseitem", 
+    "name": "Can add expense item", 
+    "content_type": 10
+  }
+},
+{
+  "pk": 29, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "change_expenseitem", 
+    "name": "Can change expense item", 
+    "content_type": 10
+  }
+},
+{
+  "pk": 30, 
+  "model": "auth.permission", 
+  "fields": {
+    "codename": "delete_expenseitem", 
+    "name": "Can delete expense item", 
+    "content_type": 10
+  }
+},
+{
+  "pk": 1, 
+  "model": "auth.user", 
+  "fields": {
+    "username": "rolisz", 
+    "first_name": "", 
+    "last_name": "", 
+    "is_active": true, 
+    "is_superuser": true, 
+    "is_staff": true, 
+    "last_login": "2013-10-09T10:51:11.739Z", 
+    "groups": [], 
+    "user_permissions": [], 
+    "password": "pbkdf2_sha256$10000$bKZ357UvOSK4$ZRUgL9lozejJBFbMa1KszVT8B+DvA+U2H5c90NHzULU=", 
+    "email": "rolisz@gmail.com", 
+    "date_joined": "2013-10-09T10:29:27.891Z"
+  }
+}
+]
