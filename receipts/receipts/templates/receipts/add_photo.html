@@ -1,0 +1,67 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.png">
+
+    <title>Expenses</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static "receipts/css/bootstrap.css" %}" rel="stylesheet">
+    <link href="{% static "receipts/css/bootstrap-theme.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "receipts/css/receipts.css" %}" rel="stylesheet">
+
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">ReceiptBudget</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+        <!--/.navbar-collapse -->
+    </div>
+</div>
+
+<div class="container">
+    <form action="/upload/" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <label for="photo">Select a photo:</label><input type="file" name="photo" id="photo" />
+        <input type="submit" value="Send photo"/>
+    </form>
+    <footer>
+        <p>&copy; ReceiptBudget 2013</p>
+    </footer>
+</div>
+<!-- /container -->
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="{% static "receipts/js/jquery.js" %}"></script>
+<script src="{% static "receipts/js/bootstrap.min.js" %}"></script>
+<script>
+    $('.expense_list li').click(function (e) {
+        console.log("aaaa")
+        $(this).find('.items').toggle()
+    })
+</script>
+</body>
+</html>

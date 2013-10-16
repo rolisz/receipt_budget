@@ -1,16 +1,12 @@
 from django.conf.urls import patterns, include, url
 
 from django.contrib import admin
+import receipts #, receipts.line
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'receipts.views.home', name='home'),
-    # url(r'^receipts/', include('receipts.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
+    url(r'', include('receipts.urls')),
+    url(r'^$', include('receipts.urls')),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^accounts/', include('userena.urls'), name="userena"),
 )
