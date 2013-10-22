@@ -139,6 +139,7 @@ INSTALLED_APPS = (
 ANONYMOUS_USER_ID = -1
 
 AUTH_PROFILE_MODULE = 'accounts.MyProfile'
+USERENA_SIGNIN_REDIRECT_URL = '/expenses/'
 LOGIN_REDIRECT_URL = '/expenses/'
 LOGIN_URL = '/accounts/signin/'
 LOGOUT_URL = '/accounts/signout/'

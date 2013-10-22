@@ -5,7 +5,7 @@ from django.http import Http404
 from django.views.generic import ListView
 
 from receipts.models import Shop, Expense, ExpenseItem
-from receipts.receipt import Receipt
+#from receipts.receipt import Receipt
 
 
 def add_new_photo(request):
