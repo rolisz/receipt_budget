@@ -6,4 +6,5 @@ urlpatterns = patterns('',
     url(r'^edit_receipt/(\d+)', views.edit_receipt, name="edit_receipt"),
     url(r'^add/', views.add_new_photo, name="add_expense"),
     url(r'^upload/', views.upload_photo, name="upload"),
+    url(r'^csv/', views.import_csv, name="import_csv"),
 )

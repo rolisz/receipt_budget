@@ -11,8 +11,6 @@ def menu_links(request):
             ['Add expense', '/add/', ''],
             ['Show expenses', '/expenses/', ''],
         ]
-    links += [['About', '/about', ''],
-             ['Contact', '/contact', '']]
 
     for link in links:
         if request.path == link[1]:

@@ -45,3 +45,9 @@ def edit_receipt(request, receipt_id):
     receipt = get_object_or_404(Expense, id=receipt_id)
     return render(request, 'receipts/edit_receipt.html', {'receipt': receipt})
 
+
+def import_csv(request):
+    if request.method == 'POST':
+        pass
+
+    return render(request, 'receipts/import_csv.html', {})

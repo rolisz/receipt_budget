@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Import CSV file{% endblock %}
+
+{% block content %}
+    <form action="/csv/" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <label for="photo">Select a CSV file:</label><input type="file" name="csv" id="csv" />
+        <input type="submit" value="Send file"/>
+    </form>
+    <div class="display">
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var form = $('form')
+    var csv_input = $('#csv')[0];
+    var csv_display = $('.display');
+
+    form.submit(function(e) {
+        e.preventDefault();
+        var file = csv_input.files[0];
+        console.log(file.name.substr(-3,3))
+        if (file.name.substr(-3,3) == 'csv') {
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                console.log(reader.result);
+                console.log(e)
+                var rows = d3.csv.parseRows(reader.result);
+                console.log(rows)
+                csv_display.text(rows[0]);
+            }
+            console.log('aaa')
+            reader.readAsText(file);
+        } else {
+            console.log('bbb')
+            csv_display.text("File not supported!");
+        }
+    });
+</script>
+{% endblock %}

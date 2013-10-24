@@ -56,6 +56,7 @@
                     </form>
                 {% else %}
                      <ul class="nav navbar-nav pull-right">
+                        <li><a href="/accounts/{{ user.username }}/">Settings</a></li>
                         <li><a href="/accounts/signout/">Sign out</a></li>
                     </ul>
                 {% endif %}
@@ -72,7 +73,11 @@
 <div class="container">
     {% block footer %}
     <footer>
-        <p>&copy; ReceiptBudget 2013</p>
+        <ul class="list-unstyled list-inline">
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><p>&copy; ReceiptBudget 2013</p></li>
+        </ul>
     </footer>
     {% endblock %}
 </div>
@@ -80,6 +85,7 @@
 
 <script src="{% static "receipts/js/jquery.js" %}"></script>
 <script src="{% static "receipts/js/bootstrap.min.js" %}"></script>
+<script src="{% static "receipts/js/d3.v3.min.js" %}"></script>
 {% block scripts %}
 {% endblock %}
 </body>
