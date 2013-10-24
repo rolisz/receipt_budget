@@ -1,5 +1,6 @@
 # Django settings for receipts project.
 import os
+import django.conf.global_settings as DEFAULT_SETTINGS
 
 DEBUG = True
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -111,7 +112,9 @@ ROOT_URLCONF = 'receipts-app.urls'
 WSGI_APPLICATION = 'receipts-app.wsgi.application'
 
 TEMPLATE_DIRS = (
-    os.path.join(BASE_PATH,'templates')
+    os.path.join(BASE_PATH, 'templates'),
+    #os.path.join(BASE_PATH, 'templates')
+    "D:/AI/receipt_budget/receipts/receipts/templates"
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -140,6 +143,7 @@ ANONYMOUS_USER_ID = -1
 
 AUTH_PROFILE_MODULE = 'accounts.MyProfile'
 USERENA_SIGNIN_REDIRECT_URL = '/expenses/'
+USERENA_REDIRECT_ON_SIGNOUT = '/'
 LOGIN_REDIRECT_URL = '/expenses/'
 LOGIN_URL = '/accounts/signin/'
 LOGOUT_URL = '/accounts/signout/'
@@ -150,6 +154,10 @@ AUTHENTICATION_BACKENDS = (
     'userena.backends.UserenaAuthenticationBackend',
     'guardian.backends.ObjectPermissionBackend',
     'django.contrib.auth.backends.ModelBackend',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = DEFAULT_SETTINGS.TEMPLATE_CONTEXT_PROCESSORS + (
+    'receipts.helper.menu_links',
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

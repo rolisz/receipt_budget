@@ -9,6 +9,8 @@ class ExpenseItemInline(admin.TabularInline):
 
 class ExpenseAdmin(admin.ModelAdmin):
     inlines = [ExpenseItemInline]
+    fields = ['date', 'shop']
+    readonly_fields = ['image']
 
 admin.site.register(Shop)
 admin.site.register(Expense, ExpenseAdmin)

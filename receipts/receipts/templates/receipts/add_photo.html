@@ -1,13 +1,11 @@
-{% extends "receipts/base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Add an expense{% endblock %}
 
-{% block contemt %}
-<div class="container">
+{% block content %}
     <form action="/upload/" enctype="multipart/form-data" method="POST">
         {% csrf_token %}
         <label for="photo">Select a photo:</label><input type="file" name="photo" id="photo" />
         <input type="submit" value="Send photo"/>
     </form>
-</div>
 {% endblock %}

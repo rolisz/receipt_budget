@@ -1,10 +1,8 @@
-{% extends "receipts/base.html" %}
-
+{% extends "base.html" %}
 
 {% block title %}Expenses{% endblock %}
 
 {% block content %}
-<div class="container">
     <a href="{% url 'add_expense' %}">Add a new receipt</a>
     <!-- Example row of columns -->
     <div class="row">
@@ -24,13 +22,12 @@
             No expenses found!
         {% endif %}
     </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
     $('.expense_list li').click(function (e) {
-        $(this).find('.items').toggle()
+        $(this).find('.items').toggle(500)
     })
 </script>
 {% endblock %}

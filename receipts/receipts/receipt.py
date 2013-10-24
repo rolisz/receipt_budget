@@ -43,9 +43,9 @@ class Receipt:
         # @todo dry this up
         # @todo comparison if new best is better, maybe can be handled by edge
         if rot == 0:
-            self.straighten(low_angle=-10, high_angle=5)
+            self.straighten(low_angle=low_angle-5, high_angle=high_angle-5)
         elif rot == len(rng) - 1:
-            self.straighten(low_angle=5, high_angle=10)
+            self.straighten(low_angle=low_angle+5, high_angle=high_angle+5)
         img = self.img.binarize().rotate(rng[rot]/float(stepsize), fixed=True)   # otsu's method removes
                                                                             # background noise better
 
