@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, get_object_or_404, redirect
@@ -47,7 +48,8 @@ def edit_receipt(request, receipt_id):
 
 
 def import_csv(request):
+    print("hello")
     if request.method == 'POST':
-        pass
+        print(json.loads(request.POST['csv']))
 
     return render(request, 'receipts/import_csv.html', {})
