@@ -11,6 +11,21 @@
         </table>
         <button id="upload_csv">Upload data</button>
     </div>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">CSV Upload</h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block scripts %}
@@ -70,7 +85,6 @@
         var disp = $('.csv_table').show();
         var table = disp.find('table');
         csv = process_csv(raw_csv);
-        console.log(JSON.stringify(csv))
         var tr = $('<tr>').appendTo(table);
         $.each(csv[0], function(ind, value) {
             $('<td>').html(make_select(['unknown', 'date', 'item', 'price', 'place'], value)).appendTo(tr);
@@ -116,12 +130,24 @@
 
     $('#upload_csv').click(function(e) {
         e.preventDefault();
+        var disp = $('.csv_table');
+        var table = disp.find('table')
+        var first_row = table.find("tr:first");
+        first_row.find('td').each(function(i, el) {
+            csv[0][i] = $(el).find(":selected").text()
+        });
+        if (csv[0].indexOf('date') == -1 || csv[0].indexOf('item') == -1 ||
+            csv[0].indexOf('price') == -1 || csv[0].indexOf('place') == -1) {
+            $('.modal-body').text("You must indicate all columns: date, price, item and place!");
+            $('#myModal').modal('show')
+            return;
+        }
         $.post('/csv/', {
             'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
-            'csv':JSON.stringify(csv),
+            'csv':JSON.stringify(csv)
         },function(e) {
-                alert("Data uploaded!");
-
+            $('.modal-body').text(e);
+            $('#myModal').modal('show')
         })
     })
 //show_csv_start([['2012.10.13', 'Kaufland', '13', 'Cumparaturi'],['2012.10.13', 'Kaufland', '13', 'Cumparaturi']])

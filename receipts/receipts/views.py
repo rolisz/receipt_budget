@@ -1,13 +1,15 @@
 import json
+from dateutil.parser import parse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.views.generic import ListView
 
 from receipts.models import Shop, Expense, ExpenseItem
 #from receipts.receipt import Receipt
+import re
 
 
 @login_required
@@ -48,8 +50,25 @@ def edit_receipt(request, receipt_id):
 
 
 def import_csv(request):
-    print("hello")
     if request.method == 'POST':
-        print(json.loads(request.POST['csv']))
+        rows = json.loads(request.POST['csv'])
+        headers = rows[0]
+        for row in rows[1:]:
+            kv = dict(zip(headers, row))
+            if len(kv['place'].strip()) == 0:
+                s = Shop.objects.get(name='unknown')
+            else:
+                s = Shop.objects.get_or_create(name=kv['place'])[0]
+            date = parse(kv['date'], dayfirst=True, yearfirst=True)
+            print(s)
+            exp = s.expense_set.create(date=date, user=request.user)
+            price = re.match("(\d+([.,]\d+))", kv['price'])
+            if not price:
+                print("Invalid price %s" % kv['price'])
+                continue
+            price = price.groups()[0]
+            exp.expenseitem_set.create(name=kv['item'], price=price)
+
+        return HttpResponse("Huge success!")
 
     return render(request, 'receipts/import_csv.html', {})

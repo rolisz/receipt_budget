@@ -8,7 +8,7 @@ class UserExpenseManager(models.Manager):
 
 class Shop(models.Model):
     name = models.CharField(max_length=50)
-    address = models.TextField()
+    address = models.TextField(blank=True)
     cui = models.CharField(max_length=30, blank=True, verbose_name="C.U.I.")
 
     def __unicode__(self):
