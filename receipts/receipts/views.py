@@ -59,7 +59,7 @@ def import_csv(request):
                 s = Shop.objects.get(name='unknown')
             else:
                 s = Shop.objects.get_or_create(name=kv['place'])[0]
-            date = parse(kv['date'], dayfirst=True, yearfirst=True)
+            date = parse(kv['date'], dayfirst=True, yearfirst=True) # not good!
             print(s)
             exp = s.expense_set.create(date=date, user=request.user)
             price = re.match("(\d+([.,]\d+))", kv['price'])

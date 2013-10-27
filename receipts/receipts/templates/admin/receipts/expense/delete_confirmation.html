@@ -1,0 +1,24 @@
+{% extends "admin/receipts/expense/header.html" %}
+{% load i18n %}
+{% load admin_urls %}
+{% load staticfiles %}
+{% block extrahead %}
+    <link href="{% static "receipts/css/bootstrap.css" %}" rel="stylesheet">
+    <link href="{% static "receipts/css/bootstrap-theme.css" %}" rel="stylesheet">
+    <script src="{% static "receipts/js/bootstrap.min.js" %}"></script>
+{% endblock %}
+{% block breadcrumbs %}
+
+{% endblock %}
+{% block coltype %}container{% endblock %}
+{% block content %}
+
+    <p>{% blocktrans with escaped_object=object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"? All of the following related items will be deleted:{% endblocktrans %}</p>
+    <ul>{{ deleted_objects|unordered_list }}</ul>
+    <form action="" method="post">{% csrf_token %}
+    <div>
+    <input type="hidden" name="post" value="yes" />
+    <input type="submit" value="{% trans "Yes, I'm sure" %}" class="btn btn-danger"/>
+    </div>
+    </form>
+{% endblock %}

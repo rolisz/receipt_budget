@@ -1,25 +1,8 @@
-{% load staticfiles %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="../../assets/ico/favicon.png">
-
-    <title>{% block title %}ReceiptBudget{% endblock %}</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="{% static "receipts/css/bootstrap.css" %}" rel="stylesheet">
-    <link href="{% static "receipts/css/bootstrap-theme.css" %}" rel="stylesheet">
-
-    <!-- Custom styles for this template -->
-    <link href="{% static "receipts/css/receipts.css" %}" rel="stylesheet">
-    {% block styles %}
-    {% endblock %}
-</head>
-
-<body>
-<div class="navbar navbar-inverse navbar-fixed-top">
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static admin_modify %}
+{% block stylesheet %}{% static "receipts/css/admin.css" %}{% endblock %}
+{% block header %}
+    <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -45,7 +28,7 @@
                 {% if not user.is_authenticated %}
                     <form class="navbar-form navbar-right" action="{% url "userena_signin" %}" method="POST">
                         {% csrf_token %}
-                        <input type="hidden" name="remember_me" value="on" >
+                        <input type="hidden" name="id_remember_me" value="True" >
                         <div class="form-group">
                             <input type="text" placeholder="Email" class="form-control" name="identification">
                         </div>
@@ -63,30 +46,4 @@
             {% endblock right_nav %}
         </div>
     </div>
-</div>
-
-<div class="container">
-{% block content %}
-{% endblock %}
-</div>
-
-<div class="container">
-    {% block footer %}
-    <footer>
-        <ul class="list-unstyled list-inline">
-            <li><a href="/about">About</a></li>
-            <li><a href="/contact">Contact</a></li>
-            <li><p>&copy; ReceiptBudget 2013</p></li>
-        </ul>
-    </footer>
-    {% endblock %}
-</div>
-
-
-<script src="{% static "receipts/js/jquery.js" %}"></script>
-<script src="{% static "receipts/js/bootstrap.min.js" %}"></script>
-<script src="{% static "receipts/js/d3.v3.min.js" %}"></script>
-{% block scripts %}
-{% endblock %}
-</body>
-</html>
+</div>{% endblock %}
