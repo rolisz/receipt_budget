@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable the admin:
     #'django_admin_bootstrapped',
     'django.contrib.admin',
+    'tokenapi',
     'receipts'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -154,6 +155,7 @@ AUTHENTICATION_BACKENDS = (
     'userena.backends.UserenaAuthenticationBackend',
     'guardian.backends.ObjectPermissionBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'tokenapi.backends.TokenBackend'
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = DEFAULT_SETTINGS.TEMPLATE_CONTEXT_PROCESSORS + (

@@ -7,6 +7,8 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'', include('receipts.urls')),
     url(r'^$', include('receipts.urls')),
+    url(r'', include('tokenapi.urls')),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^rest/', include('rest_receipts.urls')),
     url(r'^accounts/', include('userena.urls'), name="userena"),
 )

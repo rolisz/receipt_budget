@@ -9,8 +9,11 @@ __author__ = 'Roland'
 class Receipt:
 
     def __init__(self, img):
+        print(img)
+        print(isinstance(img, basestring))
         if isinstance(img, basestring):
-            img = Image(img)
+            img = Image(str(img))
+        print(img.size())
         self.img = img
         self.dimg = img.copy()
         self.nimg = Image(img.size())
@@ -86,7 +89,9 @@ class Receipt:
                     end = i + padding
             if end != 0:
                 break
-
+        print(self.img.size())
+        print(begin)
+        print(end)
         self.img = self.img.crop(begin, 0, end - begin, self.img.height)
         self.dimg = self.img.copy()
 

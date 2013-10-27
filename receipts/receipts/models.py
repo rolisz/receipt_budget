@@ -1,3 +1,6 @@
+import datetime
+from django.core.exceptions import ValidationError
+from django.core.files.storage import Storage, FileSystemStorage
 from django.db import models
 from django.db.models import Sum
 from django.contrib.auth.models import User
@@ -29,6 +32,28 @@ class Expense(models.Model):
 
     def _get_total(self):
         return self.expenseitem_set.all().aggregate(Sum('price'))['price__sum']
+
+    @classmethod
+    def from_receipt(cls, image, user):
+        from receipts.receipt import Receipt
+        s = FileSystemStorage()
+        img = s.save(image.name, image)
+        print(s.path(img))
+        #print(type(s.path(img)))
+        rec = Receipt(s.path(img))
+        rec.analyze_text()
+        props = {'shop':'SC ARTIMA SA', 'address':"STR IZLAZULUI", "items":[("APA DORNA", 3.2)], 'total':3.2,
+                 'cui':'0124345', 'data':'2013-10-10'}
+        props = rec.props
+        print(props)
+        shop = Shop.objects.get_or_create(name=props['shop'], address=props['address'], cui=props['cui'])[0]
+        try:
+            exp = shop.expense_set.create(date=props['data'], user=user, image=img)
+        except ValidationError:
+            exp = shop.expense_set.create(date=datetime.date.today(), user=user, image=img)
+        for it, price in props['items']:
+            exp.expenseitem_set.create(name=it, price=price)
+        return exp
 
     total = property(_get_total)
 
