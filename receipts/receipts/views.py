@@ -1,3 +1,4 @@
+from itertools import groupby
 import json
 from dateutil.parser import parse
 from django.contrib.auth.decorators import login_required
@@ -9,6 +10,7 @@ from django.views.generic import ListView
 from receipts.models import Shop, Expense, ExpenseItem
 #from receipts.receipt import Receipt
 import re
+from tokenapi.http import JsonResponse
 
 
 @login_required
@@ -56,3 +58,19 @@ def import_csv(request):
         return HttpResponse("Huge success!")
 
     return render(request, 'receipts/import_csv.html', {})
+
+
+@login_required
+def expense_list_day_json(request):
+    print(request.user)
+    expenses = Expense.objects.for_user(request.user).order_by('date').all()
+    groups = []
+    for k, g in groupby(expenses, lambda x: x.date):
+        day = []
+        for exp in g:
+            expense = [exp.id, str(exp.date), str(exp.shop), []]
+            for item in exp.expenseitem_set.all():
+                expense[-1].append((item.name, str(item.price), item.category))
+            day.append(expense)
+        groups.append(day)
+    return JsonResponse(groups)
