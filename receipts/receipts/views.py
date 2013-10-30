@@ -65,3 +65,5 @@ def dashboard(request, type):
     print(type)
     if type == 'map':
         return render(request, 'receipts/dashboard.html', {})
+    elif type == 'day':
+        return render(request, 'receipts/dashboard_day.html', {})

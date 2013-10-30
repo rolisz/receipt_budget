@@ -95,19 +95,15 @@ def expense_list_json(request, type):
         expenses = expenses.order_by('date').all()
         groups = []
         for k, g in groupby(expenses, lambda x: x.date):
-            groups.append(listify(g))
+            groups.append((str(k), listify_day(g)))
     else:
         JsonError("Invalid request")
     return JsonResponse(groups)
 
-def listify(expenses):
+def listify_day(expenses):
     listified = []
     for exp in expenses:
-        expense = [exp.id, str(exp.date), str(exp.shop.name), exp.shop.lat, exp.shop.lon, []]
-        sum = 0
-        for item in exp.expenseitem_set.all():
-            expense[-1].append((item.name, str(item.price), item.category))
-            sum += item.price
-        expense.append(sum)
+        expense = [exp.id, str(exp.shop.name), exp.shop.lat, exp.shop.lon, exp.total]
+
         listified.append(expense)
     return listified
