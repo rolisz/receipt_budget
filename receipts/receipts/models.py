@@ -4,6 +4,10 @@ from django.core.files.storage import Storage, FileSystemStorage
 from django.db import models
 from django.db.models import Sum
 from django.contrib.auth.models import User
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from geopy.geocoders import GoogleV3
+
 
 class UserExpenseManager(models.Manager):
     def for_user(self, user):
@@ -67,3 +71,21 @@ class ExpenseItem(models.Model):
 
     def __unicode__(self):
         return self.name + " for " + str(self.price)
+
+geolocator = GoogleV3()
+@receiver(pre_save, sender=Shop)
+def my_handler(sender, instance, **kwargs):
+    print(instance.lat, instance.lon)
+    try:
+        obj = Shop.objects.get(pk=instance.pk)
+    except Shop.DoesNotExist:
+        pass
+    if obj.address != instance.address:
+        if instance.address not in ["", "unknown"]:
+            address, (latitude, longitude) = geolocator.geocode(instance.address, exactly_one=False)[0]
+            instance.lat = latitude
+            instance.lon = longitude
+    elif obj.lat != instance.lat or obj.lon != instance.lat:
+        address, (latitude, longitude) = geolocator.reverse(instance.lat, instance.long, exactly_one=False)[0]
+        instance.address = address
+

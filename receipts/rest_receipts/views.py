@@ -2,12 +2,13 @@ from itertools import groupby
 import json
 from receipts.models import Expense, Shop
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from geopy.geocoders import GoogleV3
 from tokenapi.decorators import token_required
 from tokenapi.http import JsonError, JsonResponse
 
-geolocator = GoogleV3()
+
 
 @token_required
 @csrf_exempt
@@ -76,10 +77,22 @@ def index(request):
 @login_required
 def expense_list_json(request, type):
     print(request.user)
-    expenses = Expense.objects.for_user(request.user).order_by('date').all()
+    expenses = Expense.objects.for_user(request.user)
+
     if type == 'all':
+        expenses = expenses.all()
         groups = listify(expenses)
+    elif type == 'place':
+        shops = Shop.objects.filter(lat__isnull=False, lon__isnull=False).annotate(Sum('expense__expenseitem__price'))
+        print(shops)
+        print(shops[0].expense__expenseitem__price__sum)
+        print(shops[1].expense__expenseitem__price__sum)
+        print(shops[2].expense__expenseitem__price__sum)
+        groups = []
+        for shop in shops:
+            groups.append((shop.name, shop.lat, shop.lon, shop.expense__expenseitem__price__sum))
     elif type == 'day':
+        expenses = expenses.order_by('date').all()
         groups = []
         for k, g in groupby(expenses, lambda x: x.date):
             groups.append(listify(g))
@@ -90,13 +103,11 @@ def expense_list_json(request, type):
 def listify(expenses):
     listified = []
     for exp in expenses:
-        expense = [exp.id, str(exp.date), str(exp.shop), []]
-        if exp.shop.address not in ["", "unknown"]:
-            print(exp.shop)
-            address, (latitude, longitude) = geolocator.geocode(exp.shop.address, exactly_one=False)[0]
-            expense[3:6] = [latitude, longitude, []]
-            print(address, latitude, longitude)
+        expense = [exp.id, str(exp.date), str(exp.shop.name), exp.shop.lat, exp.shop.lon, []]
+        sum = 0
         for item in exp.expenseitem_set.all():
             expense[-1].append((item.name, str(item.price), item.category))
+            sum += item.price
+        expense.append(sum)
         listified.append(expense)
     return listified
