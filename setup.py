@@ -10,6 +10,7 @@ setup(
     author_email='rolisz@gmail.com',
     description='An application for managing expenses and doing OCR on receipts',
     requires=[
-        'django (>= 1.5)', 'scikitlearn', 'SimpleCV', 'django-tokenapi', 'django-userena', 'django_extensions'
+        'django (>= 1.5)', 'scikitlearn', 'SimpleCV', 'django-tokenapi',
+        'django-userena', 'django_extensions', 'geopy'
     ]
 )

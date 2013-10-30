@@ -7,6 +7,6 @@ urlpatterns = patterns('',
     url(r'^add/', views.add_new_photo, name="add_expense"),
     url(r'^upload/', views.upload_photo, name="upload"),
     url(r'^csv/', views.import_csv, name="import_csv"),
-    url(r'^expenses/day.json', views.expense_list_day_json, name="day_json"),
+    url(r'^dashboard/(.+?)$', views.dashboard, name="dashboard")
 
 )
