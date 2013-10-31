@@ -67,3 +67,5 @@ def dashboard(request, type):
         return render(request, 'receipts/dashboard.html', {})
     elif type == 'day':
         return render(request, 'receipts/dashboard_day.html', {})
+    elif type == 'graph':
+        return render(request, 'receipts/dashboard_dc.html', {})

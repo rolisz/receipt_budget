@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Expense dashboard{% endblock %}
+
+{% block content %}
+    <div class="type">
+        <ul class="nav nav-pills">
+            <li class="active"><a href="#">All map</a></li>
+            <li><a href="#">Map timeline</a></li>
+            <li><a href="#">Line chart</a></li>
+        </ul>
+    </div>
+    <div id="map"></div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.type {
+    padding-bottom: 10px;
+}
+</style>
+{% endblock %}
+{% block scripts %}
+    <script src="{% static "receipts/js/crossfilter.min.js" %}"></script>
+    <script src="{% static "receipts/js/dc.min.js" %}"></script>
+
+        <script type="text/javascript">
+
+
+    </script>
+{% endblock %}
