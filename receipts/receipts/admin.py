@@ -2,11 +2,11 @@ from django.contrib import admin
 from receipts.models import Expense, ExpenseItem, Shop
 
 
-class ExpenseItemInline(admin.TabularInline):
+class ExpenseItemInline(admin.StackedInline):
     model = ExpenseItem
     extra = 2
 
-    template = 'admin/receipts/expense/item_tabular.html'
+    template = 'admin/receipts/expense/item_stacked.html'
 
 class ExpenseAdmin(admin.ModelAdmin):
     class Media:

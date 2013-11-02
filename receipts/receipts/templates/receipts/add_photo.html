@@ -1,11 +1,79 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}Add an expense{% endblock %}
 
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{%  static 'receipts/css/imgareaselect-default.css' %}">
+    <style>
+        #photobooth {
+            height: 500px;
+            width: 500px;
+        }
+
+        #photobooth *, #photobooth *:before, #photobooth *:after {
+            box-sizing: content-box;
+        }
+    </style>
+{% endblock %}
 {% block content %}
-    <form action="/upload/" enctype="multipart/form-data" method="POST">
-        {% csrf_token %}
-        <label for="photo">Select a photo:</label><input type="file" name="photo" id="photo" />
-        <input type="submit" value="Send photo"/>
-    </form>
+    <div class="instructions">You can: </div>
+    <ul>
+        <li><span>Take a photo with your <a id="start_camera" href="#">camera</a></span>
+
+        <div class="hidden" id="photo_snap">
+            <i>For best results, make sure the receipt is from the top to the bottom of the image.</i>
+            <button id="snap">Take Photo</button>
+            <img src="" />
+            <button id="send_camera">Send photo</button>
+        </div>
+        </li>
+        <li>
+            <span>Upload an already taken photo</span>
+            <form action="/upload/" enctype="multipart/form-data" method="POST">
+                {% csrf_token %}
+                <label for="photo">Select a photo:</label><input type="file" name="photo" id="photo"/>
+                <input type="submit" value="Send photo"/>
+            </form>
+        </li>
+        <li><span>Or add an expense <a href="{% url 'admin:receipts_expense_add' %}">manually</a>.</span></li>
+    </ul>
+
+        <h3></h3>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static "receipts/js/say-cheese.js" %}"></script>
+    <script src="{% static "receipts/js/jquery.imgareaselect.min.js" %}"></script>
+    <script>
+        $('#start_camera').click(function(e) {
+            e.preventDefault();
+             var sayCheese = new SayCheese('#photo_snap', { snapshots: true });
+
+            sayCheese.on('start', function () {
+                $('#photo_snap').removeClass('hidden')
+            });
+
+            sayCheese.on('error', function (error) {
+                alert(error);
+            });
+
+            sayCheese.on('snapshot', function (snapshot) {
+                var img = $('#photo_snap').find('img');
+
+                console.log(snapshot);
+                img[0].src = snapshot.toDataURL('image/png');
+                img.on('load', function() {
+                    img.imgAreaSelect({show:true, handles: true, x1: snapshot.width/3, y1:0, x2:snapshot.width*2/3, y2:
+                        snapshot.height})
+                })
+            });
+
+            sayCheese.start();
+
+            $('#snap').click(function(e) {
+                sayCheese.takeSnapshot()
+            })
+        })
+
+    </script>
 {% endblock %}

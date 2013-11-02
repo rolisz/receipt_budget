@@ -60,7 +60,7 @@ def import_csv(request):
 
     return render(request, 'receipts/import_csv.html', {})
 
-
+@login_required
 def dashboard(request, type):
     print(type)
     if type == 'map':

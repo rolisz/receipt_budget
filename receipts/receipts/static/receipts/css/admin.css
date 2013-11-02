@@ -415,6 +415,10 @@ input, textarea, select, .form-row p {
     font-size: 11px;
 }
 
+.form-row select {
+    width: 207px;
+}
+
 textarea {
     vertical-align: top !important;
 }
@@ -597,7 +601,6 @@ a.deletelink:hover {
 #container {
     position: relative;
     width: 100%;
-    min-width: 760px;
     padding: 0;
 }
 #content {
