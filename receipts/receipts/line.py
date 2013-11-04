@@ -83,13 +83,6 @@ class Line:
             self.segments.append((prev, self.img.width - 1))
         self.img = self.img.applyLayers()
 
-    def blob_analyze(self):
-        blobs = self.img.findBlobs().sortX()
-        self.segments = []
-        for blob in blobs:
-            x, y, w, h = blob.boundingBox()
-            self.segments.append((x, x + w))
-
     def drawSegments(self):
         for begin, end in self.segments:
             self.img.drawRectangle(begin-1, 1, end - begin+2, 28)

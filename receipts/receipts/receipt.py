@@ -1,10 +1,13 @@
 import re
-from SimpleCV import Image, FeatureSet
-from get_receipt_info import process_receipt
+import string
+from SimpleCV import Image
 from line import Line
 import numpy as np
 
 __author__ = 'Roland'
+
+count = lambda l1, l2: len(list(filter(lambda c: c in l2, l1)))
+days = ['luni', 'marti', 'miercuri','joi', 'vineri', 'sambata', 'duminica']
 
 class Receipt:
 
@@ -123,10 +126,85 @@ class Receipt:
         self.nimg = self.nimg.applyLayers().getNumpy().transpose([1, 0, 2])
 
     def analyze_text(self):
-        #print([x.getLine() for x in self.lines])
-        self.props = process_receipt([x.getLine() for x in self.lines])
-        #print(self.props)
+        lines = [x.getLine() for x in self.lines]
+        labels = self._classify_lines(lines)
+        props = {'shop': '', 'address': '', 'cui': '', 'items': [], 'data': '', 'total': ''}
+        items = []
+        for line, label in zip(lines, labels):
+            if label in ['shop', 'cui', 'data', 'total']:
+                props[label] = line
+            elif label == 'address':
+                props[label] += line
+            elif label in ['price', 'name']:
+                items.append((line, label))
+        it = iter(items)
+        groups = []
+        for pr, na in zip(it, it):
+            if pr[1] == 'name' and na[1] == 'price':
+                pr, na = na, pr
+            regex = re.search(r'([0-9,.]+?) *?x *?([0-9,.]+)', pr[0])
+            if regex:
+                grs = regex.groups()
+                if len(grs) == 2:
+                    quantity = grs[0].replace(',','.')
+                    price = grs[1].replace(',','.')
+                    tprice = round(float(quantity)*float(price), 2)
+                elif len(grs) == 1:
+                    tprice = round(float(grs[0].replace(',','.')), 2)
+                tprst = str(tprice).replace('.', ',')
+                if tprst in na[0]:
+                    groups.append((na[0][:na[0].index(tprst)], tprice))
+                else:
+                    groups.append((na[0], tprice))
+            else:
+                print(pr, na)
 
+        props['items'] = groups
+        self.props = props
+
+    def _classify_lines(self, receipt):
+        labels = []
+        for i, line in enumerate(receipt):
+                line = str(line)
+                a_chars = count(line, string.ascii_letters)
+                num_chars = count(line, string.digits)
+                punct_chars = count(line, string.punctuation)
+
+                if 'bon fiscal' in line.lower():
+                    labels.append('unknown')
+                #if 'subtotal' in line.lower():
+                #    labels.append('unknown')
+
+                elif (re.search('S\.?C\.?(.+?)(S.?R.?L.?)|(S[:.]?A[:.]?)', line, re.IGNORECASE) or\
+                    any(x in line.lower() for x in ['kaufland'])) and i < 5 and 'shop' not in labels:
+                    labels.append('shop')
+                elif (re.search('(C.?U.?I.?)|(C.?F.?)|(C.?I.?F.?)|(COD FISCAL).+? (\d){4,}', line) or\
+                      re.search('\d{8}', line)) and i < 6:
+                    labels.append('cui')
+                elif (re.search('(STR)|(CALEA)|(B-DUL).(.+?)', line, re.IGNORECASE) and i < 7) or\
+                    (re.search('(NR).(\d+)', line, re.IGNORECASE) and i < 3):
+                    labels.append('address')
+
+
+                elif 'TVA' in line:
+                    labels.append('tva')
+                elif 'TOTAL' in line and 'SUBTOTAL' not in line:
+                    labels.append('total')
+                elif re.search('DATA?.+?\d{2,4}[.\\-]\d{2,4}[.\\-]\d{2,4}', line, re.IGNORECASE) or\
+                     re.search('\d{2}[./\\-]\d{2}[./\\-]\d{2,4}', line, re.IGNORECASE):
+                    labels.append('data')
+                elif a_chars > 0 and num_chars/a_chars > 1 and 2 < i < len(receipt) - 7 and \
+                     all(x not in line.lower() for x in ['tel', 'fax']) and 'total' not in labels:
+                    labels.append('price')
+                elif 3 < i < len(receipt) - 8 and a_chars+punct_chars > 5 and 'total' not in labels and ((\
+                     all(not re.search('(\W|^)'+x, line.lower()) for x in ['tel', 'fax', 'subtotal', 'numerar', 'brut', 'net'] +
+                     days)\
+                    and not re.search('\d{5}', line)) or labels[-1] == 'price'):
+
+                    labels.append('name')
+                else:
+                    labels.append('unknown')
+        return labels
 
 
 
