@@ -19,6 +19,7 @@ class Shop(models.Model):
     cui = models.CharField(max_length=30, blank=True, verbose_name="C.U.I.")
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
+
     def __unicode__(self):
         return self.name + ((" at " + self.address) if self.address else "")
 
