@@ -1,0 +1,64 @@
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="row">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">ReceiptBudget</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    {% block nav %}
+                        {% for name, url, active in links %}
+                            {% if active %}
+                                <li class="active"><a href="{{ url }}">{{ name }}</a></li>
+                            {% else %}
+                                <li><a href="{{ url }}">{{ name }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endblock %}
+                </ul>
+                {% block right_nav  %}
+                    {% if not user.is_authenticated %}
+                        <form class="navbar-form navbar-right" action="{% url "userena_signin" %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="id_remember_me" value="True" >
+                            <div class="form-group">
+                                <input type="text" placeholder="Email" class="form-control" name="identification">
+                            </div>
+                            <div class="form-group">
+                                <input type="password" placeholder="Password" class="form-control" name="password">
+                            </div>
+                            <button type="submit" class="btn btn-success">Sign in</button>
+                        </form>
+                    {% else %}
+                         <ul class="nav navbar-nav pull-right">
+                            <li><a href="/accounts/{{ user.username }}/">Settings</a></li>
+                            <li><a href="/accounts/signout/">Sign out</a></li>
+                        </ul>
+                    {% endif %}
+                {% endblock right_nav %}
+            </div>
+        </div>
+    </div>
+</div>
+ {% if color %}
+    <div class="row {{ color }}">
+        <div class="col-md-offset-4 col-md-4">
+            In the last week, you have spent {{ recent }}, while your long term average is {{ avg }}
+        </div>
+        {% if color == 'yellow' %}
+        <div class="col-md-offset-5 col-md-2">
+            Watch out!
+        </div>
+        {% endif %}
+        {% if color == 'red' %}
+            <div class="col-md-offset-5 col-md-2">
+                Something is wrong! You are splurging!
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

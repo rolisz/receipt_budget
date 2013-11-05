@@ -1,4 +1,4 @@
-{% extends "admin/receipts/expense/header.html" %}
+{% extends "admin/receipts/header.html" %}
 {% load i18n admin_static admin_modify %}
 {% load admin_urls %}
 
@@ -7,8 +7,9 @@
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
 {{ media }}
 {% endblock %}
-{% block extrastyle %}{{ block.super }}
+{% block extrastyle %}
     <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+    {{ block.super }}
 {% endblock %}
 
 {% block coltype %}container{% endblock %}

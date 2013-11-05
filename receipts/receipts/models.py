@@ -21,7 +21,10 @@ class Shop(models.Model):
     lon = models.FloatField(null=True, blank=True)
 
     def __unicode__(self):
-        return self.name + ((" at " + self.address) if self.address else "")
+        if self.address != 'unknown':
+            return self.name + ((" at " + self.address) if self.address else "")
+        else:
+            return self.name
 
 
 class Expense(models.Model):

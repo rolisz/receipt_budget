@@ -1,3 +1,4 @@
-1) Crud for shops
-2) Warning bar for average expenses
+4) Charts
+1) Crud for shops - check
+2) Warning bar for average expenses - check
 3) Uploading the webcam photo

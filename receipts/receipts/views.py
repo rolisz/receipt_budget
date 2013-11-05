@@ -1,5 +1,9 @@
+import StringIO
+import base64
 from itertools import groupby
 import json
+import string
+import random
 from dateutil.parser import parse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
@@ -69,3 +73,12 @@ def dashboard(request, type):
         return render(request, 'receipts/dashboard_day.html', {})
     elif type == 'graph':
         return render(request, 'receipts/dashboard_dc.html', {})
+
+@login_required()
+def upload_webcam(request):
+    print(request.POST)
+    file = StringIO.StringIO(base64.b64decode(request.POST['photo'][22:]))
+    file.name = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(10)) + ".png"
+    exp = Expense.from_receipt(file, request.user)
+    return redirect(reverse('admin:receipts_expense_change', args=(exp.id,)))
+    return HttpResponse("Huge success!")

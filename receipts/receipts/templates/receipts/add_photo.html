@@ -24,7 +24,15 @@
             <i>For best results, make sure the receipt is from the top to the bottom of the image.</i>
             <button id="snap">Take Photo</button>
             <img src="" />
-            <button id="send_camera">Send photo</button>
+            <form id="webcam_form" method="POST" action="/upload_webcam/">
+                {% csrf_token %}
+                <input type="hidden" name="photo" id="webcam_photo" />
+                <input type="hidden" name="x1" id="x1" />
+                <input type="hidden" name="y1" id="y1" />
+                <input type="hidden" name="x2" id="x2" />
+                <input type="hidden" name="y2" id="y2" />
+                <button type="submit" id="send_camera">Send photo</button>
+            </form>
         </div>
         </li>
         <li>
@@ -47,7 +55,9 @@
     <script>
         $('#start_camera').click(function(e) {
             e.preventDefault();
-             var sayCheese = new SayCheese('#photo_snap', { snapshots: true });
+            var webcam_img;
+            var area_select;
+            var sayCheese = new SayCheese('#photo_snap', { snapshots: true });
 
             sayCheese.on('start', function () {
                 $('#photo_snap').removeClass('hidden')
@@ -59,12 +69,12 @@
 
             sayCheese.on('snapshot', function (snapshot) {
                 var img = $('#photo_snap').find('img');
-
-                console.log(snapshot);
+                webcam_img = snapshot.toDataURL('image/png');
+                console.log(webcam_img)
                 img[0].src = snapshot.toDataURL('image/png');
                 img.on('load', function() {
-                    img.imgAreaSelect({show:true, handles: true, x1: snapshot.width/3, y1:0, x2:snapshot.width*2/3, y2:
-                        snapshot.height})
+                    area_select = img.imgAreaSelect({show:true, handles: true, x1: snapshot.width/3, y1:0, x2:snapshot.width*2/3, y2:
+                        snapshot.height, instance: true})
                 })
             });
 
@@ -73,8 +83,16 @@
             $('#snap').click(function(e) {
                 sayCheese.takeSnapshot()
             })
-            $('#send_photo').click(function(e) {
-
+            $('#send_camera').click(function(e) {
+//                e.preventDefault();#}
+                $('#webcam_photo').val(webcam_img);
+                var sel = area_select.getSelection();
+                $('#x1').val(sel.x1);
+                $('#x2').val(sel.x2);
+                $('#y1').val(sel.y1);
+                $('#y2').val(sel.y2);
+                sayCheese.stop();
+//                $('#webcam_form').submit();#}
             })
         })
 

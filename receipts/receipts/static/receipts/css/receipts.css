@@ -10,3 +10,13 @@ body {
 #main_content {
     padding-top: 10px;
 }
+
+.yellow {
+    background-color: #ffff00;
+}
+.red {
+    background-color: red;
+}
+.green {
+    background-color: greenyellow;
+}

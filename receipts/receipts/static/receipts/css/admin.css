@@ -623,4 +623,14 @@ a.deletelink:hover {
     padding: 10px;
 }
 
-
+.field-shop .field-link label {
+    display: none;
+}
+.field-shop .field-link p {
+    margin-left:0;
+    padding-left: 10px;
+}
+.vLargeTextField {
+    width: auto;
+    min-width: 20em;
+}
