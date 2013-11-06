@@ -7,8 +7,8 @@
     <div class="type">
         <ul class="nav nav-pills">
             <li class="active"><a href="#">All map</a></li>
-            <li><a href="#">Map timeline</a></li>
-            <li><a href="#">Line chart</a></li>
+            <li><a href="/dashboard/day">Map timeline</a></li>
+            <li><a href="/dashboard/graph">Line chart</a></li>
         </ul>
     </div>
     <div id="map"></div>
@@ -30,8 +30,7 @@
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true&libraries=visualization"></script>
-
-        <script type="text/javascript">
+    <script type="text/javascript">
 
 var map = new google.maps.Map($("#map")[0], {
   zoom: 12,
@@ -52,7 +51,5 @@ $.getJSON("/rest/expenses/place.json", function(data) {
     heatmap.setMap(map);
 
   });
-
-
-    </script>
+</script>
 {% endblock %}

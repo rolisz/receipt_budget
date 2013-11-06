@@ -9,7 +9,6 @@ from tokenapi.decorators import token_required
 from tokenapi.http import JsonError, JsonResponse
 
 
-
 @token_required
 @csrf_exempt
 def add(request):
@@ -66,13 +65,9 @@ def delete(request, id):
 def index(request):
     print(request.user)
     expenses = Expense.objects.for_user(request.user).all()
-    l = []
-    for exp in expenses:
-        expense = [exp.id, str(exp.date), str(exp.shop), []]
-        for item in exp.expenseitem_set.all():
-            expense[-1].append((item.name, str(item.price), item.category))
-        l.append(expense)
+    l = listify(expenses)
     return JsonResponse(l)
+
 
 @login_required
 def expense_list_json(request, type):
@@ -91,15 +86,16 @@ def expense_list_json(request, type):
         expenses = expenses.order_by('date').all()
         groups = []
         for k, g in groupby(expenses, lambda x: x.date):
-            groups.append((str(k), listify_day(g)))
+            groups.append((str(k), listify(g)))
     else:
         JsonError("Invalid request")
     return JsonResponse(groups)
 
-def listify_day(expenses):
+
+def listify(expenses):
     listified = []
     for exp in expenses:
-        expense = [exp.id, str(exp.shop.name), exp.shop.lat, exp.shop.lon, exp.total]
-
+        expense = {'id': exp.id, 'shop': str(exp.shop.name), 'lat': exp.shop.lat, 'lon': exp.shop.lon,
+                   'total': exp.total, 'date': str(exp.date)}
         listified.append(expense)
     return listified

@@ -12,11 +12,20 @@ days = ['luni', 'marti', 'miercuri','joi', 'vineri', 'sambata', 'duminica']
 class Receipt:
 
     def __init__(self, img):
-        print(img)
-        print(isinstance(img, basestring))
         if isinstance(img, basestring):
             img = Image(str(img))
-        print(img.size())
+        self.img = img
+
+        # do binarization on smaller parts of the image, then join them back together
+        # should help with varied ilumination
+        imgs = img.split(1, 8)
+        bin_imgs = []
+        for img in imgs:
+            bin_imgs.append(img[0].binarize())
+        print(bin_imgs)
+        img = bin_imgs[0]
+        for i in range(1, len(bin_imgs)):
+            img = img.sideBySide(bin_imgs[i], side='bottom')
         self.img = img
         self.dimg = img.copy()
         self.nimg = Image(img.size())
@@ -27,14 +36,15 @@ class Receipt:
 
     def straighten(self, stepsize=3, low_angle=-5, high_angle=5):
         origWidth = self.img.width
+        if low_angle < -20 or high_angle > 20:
+            raise Exception("Photo is too skewed. Please straighten photo before trying to process it")
         img = self.img.resize(w=600)         # for some reason, straightening works better at this width :-??
 
         # straighten out images
         # using histograms: rotate +-5 in .3 steps, get max of each histogram
         #                   and ideal rotation is argmax of those maxes
 
-        simg = img.binarize(210)    # for some reason, straightening works better with this binarization
-                                    # rather than otsu's method
+        simg = img
         hists = []
         rng = list(range(low_angle*stepsize, high_angle*stepsize))
         bincount = 600 if img.height > 600 else img.height
@@ -46,13 +56,11 @@ class Receipt:
 
         # if the best rotation angle is the one on the edge of our threshold, try to rotate again with an extended
         # threshold in that direction
-        # @todo dry this up
-        # @todo comparison if new best is better, maybe can be handled by edge
         if rot == 0:
             self.straighten(low_angle=low_angle-5, high_angle=high_angle-5)
         elif rot == len(rng) - 1:
             self.straighten(low_angle=low_angle+5, high_angle=high_angle+5)
-        img = self.img.binarize().rotate(rng[rot]/float(stepsize), fixed=True)   # otsu's method removes
+        img = self.img.rotate(rng[rot]/float(stepsize), fixed=True)   # otsu's method removes
                                                                             # background noise better
 
         # self.img = img.resize(w=origWidth//2)        # so that all letters are small enough
@@ -63,16 +71,19 @@ class Receipt:
         # beginning is considered from the point where there is more than 100 pixels on a line
         # and in the following 100 lines there are no 10 consecutive lines with less then 250 pixels in total
         # and add 10 px padding
+        # or if more then 30% of pixels are all white
         # same for end
         self.gnmp = self.img.getGrayNumpy()
         verticalProj = self.gnmp.sum(axis=1)
         begin = 0
         end = 0
+        upper_thresh = self.img.height * 255 * 0.3 * 10
         for i, p in enumerate(verticalProj):
             if begin == 0 and p > low_thresh:
                 found = False
                 for j in range(10, line_range):
-                    if sum(verticalProj[i+j:i+j+consec_lines]) < line_thresh:
+                    s = sum(verticalProj[i+j:i+j+consec_lines])
+                    if s < line_thresh or s > upper_thresh:
                         found = True
                         break
                 if not found:
@@ -85,23 +96,35 @@ class Receipt:
             if end == 0 and p > low_thresh:
                 found = False
                 for j in range(10, line_range):
-                    if sum(verticalProj[i - j:i-j+consec_lines]) < line_thresh:
+                    s = sum(verticalProj[i - j:i-j+consec_lines])
+                    if s < line_thresh or s > upper_thresh:
                         found = True
                         break
                 if not found:
                     end = i + padding
             if end != 0:
                 break
-        print(self.img.size())
-        print(begin)
-        print(end)
+
+        if self.gnmp.sum(axis=0).mean() > 15000:
+            begin = max(20, begin)
+            end = min(self.img.width - 20, end)
+        else:
+            begin = max(0, begin)
+            end = min(self.img.width, end)
+        begin = 0 if begin < 0 else begin
+        end = self.img.width if end > self.img.width else end
+
         self.img = self.img.crop(begin, 0, end - begin, self.img.height)
+        self.gnmp = self.img.getGrayNumpy()
         self.dimg = self.img.copy()
 
     def findLines(self, line_beg=0, line_end=0, thresh=2000, padding=2):
         # find lines
         horizProj = self.gnmp.sum(axis=0)
 
+        mean = np.mean(horizProj)
+        if mean > thresh * 5:
+            thresh = np.mean(horizProj[200:-200])
         self.lines = []
         for i, p in enumerate(horizProj):
             if p > thresh and line_beg == 0:
@@ -118,6 +141,9 @@ class Receipt:
                 self.img.drawRectangle(1, line.beginY, self.img.width - 2, line.endY - line.beginY)
 
     def readBlobs(self):
+        """
+        Analyze each line
+        """
         for line in self.lines:
             line.analyze()
             line.readLetters()
@@ -126,6 +152,9 @@ class Receipt:
         self.nimg = self.nimg.applyLayers().getNumpy().transpose([1, 0, 2])
 
     def analyze_text(self):
+        """
+        Determine the properties of each line: shop, address, cui, items, date or total
+        """
         lines = [x.getLine() for x in self.lines]
         labels = self._classify_lines(lines)
         props = {'shop': '', 'address': '', 'cui': '', 'items': [], 'data': '', 'total': ''}
@@ -163,6 +192,9 @@ class Receipt:
         self.props = props
 
     def _classify_lines(self, receipt):
+        """
+        Classify each line with what it contains using a naive, rule based classifier
+        """
         labels = []
         for i, line in enumerate(receipt):
                 line = str(line)
@@ -205,35 +237,3 @@ class Receipt:
                 else:
                     labels.append('unknown')
         return labels
-
-
-
-def train(i):
-    print(i)
-    img_letters = []
-    try:
-        img = Receipt("D:/AI/Bonuri/bonuri/bon%d.jpg" % i)
-        for line in img.lines:
-            img_letters.append(line.letters)
-            print(line.letters)
-    except Exception:
-        pass
-    return i, img_letters
-
-
-if __name__ == '__main__':
-    img = Receipt("D:/AI/Bonuri/bonuri/bon%d.jpg" % 3)
-    img.analyze_text()
-    #letters = []
-    #from sklearn.externals.joblib import Parallel, delayed
-    #
-    #
-    #r = Parallel(n_jobs=4, verbose=15)(delayed(train)(i) for i in range(1, 40))
-    #
-    #for i, img_letters in r:
-    #    letters.append(img_letters)
-    #
-    #import cPickle
-    #f = open("read_letters.pkl", "wb")
-    #cPickle.dump(letters, f)
-    #f.close()

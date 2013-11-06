@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% if not user.is_authenticated %}
 <div class="jumbotron">
         <h1>Hello, world!</h1>
 
@@ -10,4 +11,7 @@
 
         <p><a class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
 </div>
+{% else %}
+    {% include 'receipts/expense_list.html' %}
+{% endif %}
 {% endblock %}

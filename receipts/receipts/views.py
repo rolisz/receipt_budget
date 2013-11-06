@@ -2,10 +2,14 @@ import StringIO
 import base64
 from itertools import groupby
 import json
+import os
 import string
 import random
+from SimpleCV import Image
 from dateutil.parser import parse
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
@@ -25,12 +29,20 @@ def add_new_photo(request):
 
 @login_required
 def upload_photo(request):
-    exp = Expense.from_receipt(request.FILES['photo'], request.user)
+    image = request.FILES['photo']
+    s = FileSystemStorage()
+    img = s.save(image.name, image)
+    print(s.path(img))
+    exp = Expense.from_receipt(s.path(img), request.user)
     return redirect(reverse('admin:receipts_expense_change', args=(exp.id,)))
 
 
 def index(request):
-    return render(request, 'receipts/index.html')
+    if request.user.is_authenticated():
+        expenses = Expense.objects.for_user(request.user).all()
+        return render(request, 'receipts/expense_list.html', {'expenses':expenses})
+    else:
+        return render(request, 'receipts/index.html')
 
 
 @login_required
@@ -49,8 +61,13 @@ def import_csv(request):
             if len(kv['place'].strip()) == 0:
                 s = Shop.objects.get(name='unknown')
             else:
-                s = Shop.objects.get_or_create(name=kv['place'])[0]
-            date = parse(kv['date'], dayfirst=True, yearfirst=True) # not good!
+                try:
+                    s = Shop.objects.get(name__contains=kv['place'])
+                except Shop.DoesNotExist:
+                    s = Shop.objects.create(name=kv['place'])
+                except Shop.MultipleObjectsReturned:
+                    s = Shop.objects.filter(name__contains=kv['place'])[0]
+            date = parse(kv['date'], dayfirst=True)
             print(s)
             exp = s.expense_set.create(date=date, user=request.user)
             price = re.match("(\d+([.,]\d+))", kv['price'])
@@ -60,7 +77,7 @@ def import_csv(request):
             price = price.groups()[0]
             exp.expenseitem_set.create(name=kv['item'], price=price)
 
-        return HttpResponse("Huge success!")
+        return HttpResponse("Success!")
 
     return render(request, 'receipts/import_csv.html', {})
 
@@ -76,9 +93,23 @@ def dashboard(request, type):
 
 @login_required()
 def upload_webcam(request):
-    print(request.POST)
-    file = StringIO.StringIO(base64.b64decode(request.POST['photo'][22:]))
-    file.name = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(10)) + ".png"
-    exp = Expense.from_receipt(file, request.user)
-    return redirect(reverse('admin:receipts_expense_change', args=(exp.id,)))
-    return HttpResponse("Huge success!")
+    """
+    Generate a random name for the photo and save it to disk, then crop it and extract information
+    """
+    name = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(10)) + ".png"
+    path = os.path.join(settings.MEDIA_ROOT, name)
+    f = open(path, "wb")
+    img_string = request.POST['photo'][22:]
+    img_data = img_string.decode("base64")
+    f.write(img_data)
+    f.close()
+    img = Image(path)
+    coords = [(int(request.POST['x1']), int(request.POST['y1'])),
+              (int(request.POST['x2']), int(request.POST['y2']))]
+    img = img.crop(*coords)
+    img.save(path)
+    try:
+        exp = Expense.from_receipt(path, request.user)
+        return redirect(reverse('admin:receipts_expense_change', args=(exp.id,)))
+    except Exception:
+        return render(request, 'receipts/add_photo.html', {'error': "Couldn't find a receipt in the image!"})

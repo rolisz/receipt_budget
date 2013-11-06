@@ -44,6 +44,9 @@ class Line:
         self.endY = end
 
     def analyze(self):
+        """
+        Character segmentation
+        """
         prev = 0
         i = size
         true_query = []
@@ -66,11 +69,7 @@ class Line:
             if pred == 1:
                 true_query.append((i - size, probabilities[1], all_black))
                 all_black = True
-                if 3 < i - prev < 30:
-                    prev = i
-                    i += 3
-                else:
-                    prev = i
+                prev = i
             i += 1
 
         self.segments = []
@@ -83,12 +82,10 @@ class Line:
             self.segments.append((prev, self.img.width - 1))
         self.img = self.img.applyLayers()
 
-    def drawSegments(self):
-        for begin, end in self.segments:
-            self.img.drawRectangle(begin-1, 1, end - begin+2, 28)
-        self.img = self.img.applyLayers()
-
     def readLetters(self):
+        """
+        Character recognition
+        """
         self.letters = []
         i = 0
         letters = []
@@ -113,7 +110,7 @@ class Line:
         self.img = self.img.applyLayers()
 
     def getWordsX(self):
-        """line should be in format letter, x1 (beginning of letter), x2 (end of letter)"""
+        """Return words with x coordinates"""
         word = ''
         prev = 0
         prev_word_start = 0
@@ -138,6 +135,7 @@ class Line:
         yield (word, prev_word_start)
 
     def getLine(self):
+        """Just return words with spaces between them"""
         words = list(self.getWordsX())
         line = ''
         prev = 0
@@ -145,17 +143,3 @@ class Line:
             line+=' '*((start-prev)/10)+ word
             prev = start
         return line
-
-if __name__ == '__main__':
-    line = Line(0, 30, Image("D:\\AI\\Bonuri\\imgs\\lines\\9.jpg"))
-    line.analyze()
-    print(line.segments)
-    # @todo explore blobing + segmentation of blobs with unusual aspect ratio
-    # because plain segmentation is really bad
-    # (I think it's because the model was not trained on that kind of segmentation)
-    # or use existing data to generate new labeled data for this segmentation
-    # line.blob_analyze()
-
-    line.readLetters()
-    line.img.save("test.jpg")
-    print(line.letters)

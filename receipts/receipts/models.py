@@ -1,3 +1,4 @@
+from collections import namedtuple
 import datetime
 from django.core.exceptions import ValidationError
 from django.core.files.storage import Storage, FileSystemStorage
@@ -7,6 +8,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from geopy.geocoders import GoogleV3
+from geopy.geocoders.googlev3 import GQueryError
 
 
 class UserExpenseManager(models.Manager):
@@ -45,21 +47,15 @@ class Expense(models.Model):
     @classmethod
     def from_receipt(cls, image, user):
         from receipts.receipt import Receipt
-        s = FileSystemStorage()
-        img = s.save(image.name, image)
-        print(s.path(img))
-        #print(type(s.path(img)))
-        rec = Receipt(s.path(img))
+        rec = Receipt(image)
         rec.analyze_text()
-        props = {'shop':'SC ARTIMA SA', 'address':"STR IZLAZULUI", "items":[("APA DORNA", 3.2)], 'total':3.2,
-                 'cui':'0124345', 'data':'2013-10-10'}
         props = rec.props
         print(props)
         shop = Shop.objects.get_or_create(name=props['shop'], address=props['address'], cui=props['cui'])[0]
         try:
-            exp = shop.expense_set.create(date=props['data'], user=user, image=img)
+            exp = shop.expense_set.create(date=props['data'], user=user, image=image)
         except ValidationError:
-            exp = shop.expense_set.create(date=datetime.date.today(), user=user, image=img)
+            exp = shop.expense_set.create(date=datetime.date.today(), user=user, image=image)
         for it, price in props['items']:
             exp.expenseitem_set.create(name=it, price=price)
         return exp
@@ -79,16 +75,22 @@ class ExpenseItem(models.Model):
 geolocator = GoogleV3()
 @receiver(pre_save, sender=Shop)
 def my_handler(sender, instance, **kwargs):
-    print(instance.lat, instance.lon)
+    """
+    When editing a shop, do a geocoding request if address changed
+    """
     try:
         obj = Shop.objects.get(pk=instance.pk)
     except Shop.DoesNotExist:
-        pass
+        obj = namedtuple('Shop', ['address'])
+        obj.address = ""
     if obj.address != instance.address:
         if instance.address not in ["", "unknown"]:
-            address, (latitude, longitude) = geolocator.geocode(instance.address, exactly_one=False)[0]
-            instance.lat = latitude
-            instance.lon = longitude
+            try:
+                address, (latitude, longitude) = geolocator.geocode(instance.address, exactly_one=False)[0]
+                instance.lat = latitude
+                instance.lon = longitude
+            except GQueryError:
+                pass
     elif obj.lat != instance.lat or obj.lon != instance.lat:
         address, (latitude, longitude) = geolocator.reverse(instance.lat, instance.long, exactly_one=False)[0]
         instance.address = address

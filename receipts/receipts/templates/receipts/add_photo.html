@@ -16,6 +16,7 @@
     </style>
 {% endblock %}
 {% block content %}
+    <div class="error">{{ error }}</div>
     <div class="instructions">You can: </div>
     <ul>
         <li><span>Take a photo with your <a id="start_camera" href="#">camera</a></span>
@@ -81,7 +82,7 @@
             sayCheese.start();
 
             $('#snap').click(function(e) {
-                sayCheese.takeSnapshot()
+                sayCheese.takeSnapshot(960,720)
             })
             $('#send_camera').click(function(e) {
 //                e.preventDefault();#}

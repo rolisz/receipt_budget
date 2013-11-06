@@ -31,11 +31,12 @@ class ExpenseAdmin(admin.ModelAdmin):
         url = reverse('admin:receipts_shop_change',args=(obj.shop.id,))
         print(url)
         return mark_safe("<a href='%s'>edit</a>" % url)
+
     link.allow_tags = True
     link.short_description = ""
+
     inlines = [ExpenseItemInline]
     fields = ['date', ('shop', 'link')]
-    readonly_fields = ['image', 'link']
 
 
 class ShopAdmin(admin.ModelAdmin):

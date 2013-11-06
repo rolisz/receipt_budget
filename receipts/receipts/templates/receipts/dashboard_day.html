@@ -6,16 +6,19 @@
 {% block content %}
     <div class="type">
         <ul class="nav nav-pills">
-            <li class="active"><a href="#">All map</a></li>
-            <li><a href="#">Map timeline</a></li>
-            <li><a href="#">Line chart</a></li>
+            <li><a href="/dashboard/map">All map</a></li>
+            <li class="active"><a href="#">Map timeline</a></li>
+            <li><a href="/dashboard/graph">Line chart</a></li>
         </ul>
     </div>
+    <span id="date"></span>
+    <button id="play">Play</button>
     <div id="map"></div>
-    <button id="next_day">Next day</button>
+    <div id="slider"></div>
 {% endblock %}
 
 {% block styles %}
+    <link href="{% static "receipts/css/d3.slider.css" %}" rel="stylesheet">
 <style>
 #map {
   width: 100%;
@@ -23,7 +26,10 @@
   margin: 0;
   padding: 0;
 }
-
+#slider {
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
 .type {
     padding-bottom: 10px;
 }
@@ -31,8 +37,8 @@
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true&libraries=visualization"></script>
-
-        <script type="text/javascript">
+    <script src="{% static "receipts/js/d3.slider.js" %}"></script>
+    <script type="text/javascript">
 
 var map = new google.maps.Map($("#map")[0], {
   zoom: 12,
@@ -41,30 +47,52 @@ var map = new google.maps.Map($("#map")[0], {
 });
 var all_data = [];
 var i = 0;
+var time_out;
+var ts;
+$('#play').click(function(e) {
+    set_map(0, true);
+});
 // Load the station data. When the data comes back, create an overlay.
 $.getJSON("/rest/expenses/day.json", function(data) {
     all_data = data;
-    console.log(all_data)
-    next_day()
+    var width = 700,
+        height = 400,
+        padding = 100;
+    var dates = [new Date(d3.min(all_data,function(e) {
+                return e[0];
+            })), new Date(d3.max(all_data,function(e) {
+                return e[0];
+            }))];
+    ts = d3.time.scale()
+                .domain(dates).range([0, data.length]);
+    var axis = d3.svg.axis()
+                .orient("bottom")
+                .scale(ts);
+    d3.select('#slider').call(d3.slider().min(0).max(data.length-1).on("slide", function(evt, value) {
+        console.log(value);
+        clearTimeout(time_out);
+        set_map(value);
+    }).axis(axis));
+});
 
-
-  });
-var heatmap =new google.maps.visualization.HeatmapLayer();
-function next_day() {
-    points = $.map($.grep(all_data[i][1], function(val, i) {
-        return val[1] != null && val[2] != null
+var heatmap = new google.maps.visualization.HeatmapLayer();
+function set_map(i, animate) {
+    var points = $.map($.grep(all_data[i][1], function(val, i) {
+        return val.lat != null && val.lon != null
     }), function(val, i) {
-        console.log(val)
-        console.log({location: new google.maps.LatLng(val[1], val[2]), weight: val[3]})
-        return {location: new google.maps.LatLng(val[2], val[3]), weight: val[4]}
+        return {location: new google.maps.LatLng(val.lat, val.lon), weight: val.total}
     });
     heatmap.setData(points);
     heatmap.setOptions({radius: 40, opacity: 0.7});
     heatmap.setMap(map);
-    i = (i+1) % all_data.length;
+    d3.select('#date').text(ts.invert(i).toDateString());
+    if (animate && i < all_data.length) {
+
+         time_out = setTimeout(function() {
+            set_map(i+1, true);
+        }, 1000)
+    }
 }
-        $('#next_day').click(function(e) {
-            next_day()
-        })
-    </script>
+
+</script>
 {% endblock %}
