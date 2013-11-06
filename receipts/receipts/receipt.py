@@ -7,7 +7,7 @@ import numpy as np
 __author__ = 'Roland'
 
 count = lambda l1, l2: len(list(filter(lambda c: c in l2, l1)))
-days = ['luni', 'marti', 'miercuri','joi', 'vineri', 'sambata', 'duminica']
+days = ['luni', 'marti', 'miercuri', 'joi', 'vineri', 'sambata', 'duminica']
 
 class Receipt:
 
@@ -207,7 +207,7 @@ class Receipt:
                 #if 'subtotal' in line.lower():
                 #    labels.append('unknown')
 
-                elif (re.search('S\.?C\.?(.+?)(S.?R.?L.?)|(S[:.]?A[:.]?)', line, re.IGNORECASE) or\
+                elif (re.search('S\.?C\.?(.+?)(S.?R.?L.?)|(S[:.,]?A[:.,]?)', line, re.IGNORECASE) or\
                     any(x in line.lower() for x in ['kaufland'])) and i < 5 and 'shop' not in labels:
                     labels.append('shop')
                 elif (re.search('(C.?U.?I.?)|(C.?F.?)|(C.?I.?F.?)|(COD FISCAL).+? (\d){4,}', line) or\

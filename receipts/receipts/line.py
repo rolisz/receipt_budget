@@ -64,12 +64,16 @@ class Line:
                 pred = 0
             else:
                 pred = 1
-            if all_black and nimg[:,i].sum() > 50:
+            if all_black and nimg[:, i].sum() > 50:
                 all_black = False
             if pred == 1:
                 true_query.append((i - size, probabilities[1], all_black))
                 all_black = True
-                prev = i
+                if 5 < i - prev < 30:
+                    prev = i
+                    i += 5
+                else:
+                    prev = i
             i += 1
 
         self.segments = []
@@ -119,17 +123,12 @@ class Line:
         space_dist = avg * 1.5 if avg * 1.5 > 5 else 7
         for i, element in enumerate(self.letters):
             letter, x1, x2 = element
-            # print(line)
-            if i < 5:
-                hist = [10] * (5 - i) + distances[:i]
-            else:
-                hist = distances[i - 5:i]
 
-            if i > 0 and x1 - prev >= space_dist and word:        # @todo somekind of adaptive threshold?
+            if i > 0 and x1 - prev >= space_dist and word:
                 yield (word, prev_word_start)
-                #yield word
                 word = ''
                 prev_word_start = x1
+
             prev = x2
             word += letter
         yield (word, prev_word_start)
@@ -140,6 +139,6 @@ class Line:
         line = ''
         prev = 0
         for word, start in words:
-            line+=' '*((start-prev)/10)+ word
+            line += ' '*((start-prev)/10)+ word
             prev = start
         return line
