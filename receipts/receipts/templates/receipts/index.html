@@ -3,15 +3,15 @@
 {% block content %}
 {% if not user.is_authenticated %}
 <div class="jumbotron">
-        <h1>Hello, world!</h1>
+        <h1>Start saving money!</h1>
 
-        <p>This is a template for a simple marketing or informational website. It includes a large callout called the
-            hero unit and three supporting pieces of content. Use it as a starting point to create something more
-            unique.</p>
+        <p>Stop trying to remember where you spent your money every day and instead just use ReceiptBudgets OCR to
+            scan your receipts.</p>
 
-        <p><a class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+        <p>Can't make sense of long tables of your expense data? ReceiptBudget has a friendly and intuitive dashboard to
+            help you understand your shopping patterns!.</p>
+
+        <p><a class="btn btn-primary btn-lg" href="/accounts/signup/">Sign up now!</a></p>
 </div>
-{% else %}
-    {% include 'receipts/expense_list.html' %}
 {% endif %}
 {% endblock %}

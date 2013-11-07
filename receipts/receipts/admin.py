@@ -37,6 +37,7 @@ class ExpenseAdmin(admin.ModelAdmin):
 
     inlines = [ExpenseItemInline]
     fields = ['date', ('shop', 'link')]
+    readonly_fields = ['image', 'link']
 
 
 class ShopAdmin(admin.ModelAdmin):

@@ -1,7 +1,6 @@
 from collections import namedtuple
 import datetime
 from django.core.exceptions import ValidationError
-from django.core.files.storage import Storage, FileSystemStorage
 from django.db import models
 from django.db.models import Sum
 from django.contrib.auth.models import User
@@ -78,11 +77,14 @@ def my_handler(sender, instance, **kwargs):
     """
     When editing a shop, do a geocoding request if address changed
     """
+    print(instance)
     try:
         obj = Shop.objects.get(pk=instance.pk)
     except Shop.DoesNotExist:
-        obj = namedtuple('Shop', ['address'])
+        obj = namedtuple('Shop', ['address', 'lat', 'lon'])
         obj.address = ""
+        obj.lat = ""
+        obj.lon = ""
     if obj.address != instance.address:
         if instance.address not in ["", "unknown"]:
             try:
@@ -92,6 +94,9 @@ def my_handler(sender, instance, **kwargs):
             except GQueryError:
                 pass
     elif obj.lat != instance.lat or obj.lon != instance.lat:
-        address, (latitude, longitude) = geolocator.reverse(instance.lat, instance.long, exactly_one=False)[0]
-        instance.address = address
+        try:
+            address, (latitude, longitude) = geolocator.reverse(instance.lat, instance.lon, exactly_one=False)[0]
+            instance.address = address
+        except GQueryError:
+            pass
 

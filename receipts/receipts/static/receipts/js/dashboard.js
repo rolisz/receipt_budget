@@ -93,17 +93,10 @@ $.getJSON("/rest/expenses/all.json", function (data) {
         return d.total;
     });
 
-    // summarize total by quarter
+    // summarize total by months
     var quarter = ndx.dimension(function (d) {
         var month = d.dd.getMonth();
-        if (month <= 2)
-            return "Q1";
-        else if (month > 3 && month <= 5)
-            return "Q2";
-        else if (month > 5 && month <= 8)
-            return "Q3";
-        else
-            return "Q4";
+        return d3.time.format("%B")(d.dd);
     });
     var quarterGroup = quarter.group().reduceSum(function (d) {
         return d.total;
