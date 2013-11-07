@@ -1,3 +1,4 @@
+from itertools import izip_longest
 import re
 import string
 from SimpleCV import Image
@@ -168,7 +169,7 @@ class Receipt:
                 items.append((line, label))
         it = iter(items)
         groups = []
-        for pr, na in zip(it, it):
+        for pr, na in izip_longest(it, it, fillvalue=('', '')):
             if pr[1] == 'name' and na[1] == 'price':
                 pr, na = na, pr
             regex = re.search(r'([0-9,.]+?) *?x *?([0-9,.]+)', pr[0])
@@ -186,7 +187,14 @@ class Receipt:
                 else:
                     groups.append((na[0], tprice))
             else:
-                print(pr, na)
+                same_line = re.search(r'(.+?) +([0-9][0-9,.]*)', pr[0])
+                if same_line:
+                    grs = same_line.groups()
+                    groups.append((grs[0], float(grs[1].replace(',','.'))))
+                same_line = re.search(r'(.+?) +([0-9,.]+)', na[0])
+                if same_line:
+                    grs = same_line.groups()
+                    groups.append((grs[0], float(grs[1].replace(',','.'))))
 
         props['items'] = groups
         self.props = props
@@ -210,7 +218,7 @@ class Receipt:
                 elif (re.search('S\.?C\.?(.+?)(S.?R.?L.?)|(S[:.,]?A[:.,]?)', line, re.IGNORECASE) or\
                     any(x in line.lower() for x in ['kaufland'])) and i < 5 and 'shop' not in labels:
                     labels.append('shop')
-                elif (re.search('(C.?U.?I.?)|(C.?F.?)|(C.?I.?F.?)|(COD FISCAL).+? (\d){4,}', line) or\
+                elif (re.search('(C[^\w]?U[^\w]?I[^\w]?)|(C[^\w]?F[^\w]?)|(C[^\w]?I[^\w]?F[^\w]?)|(COD FISCAL).+? (\d){4,}', line) or\
                       re.search('\d{8}', line)) and i < 6:
                     labels.append('cui')
                 elif (re.search('(STR)|(CALEA)|(B-DUL).(.+?)', line, re.IGNORECASE) and i < 7) or\
