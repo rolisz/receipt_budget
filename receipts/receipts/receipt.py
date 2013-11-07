@@ -161,8 +161,14 @@ class Receipt:
         props = {'shop': '', 'address': '', 'cui': '', 'items': [], 'data': '', 'total': ''}
         items = []
         for line, label in zip(lines, labels):
-            if label in ['shop', 'cui', 'data', 'total']:
+            if label in ['shop', 'total']:
                 props[label] = line
+            elif label == 'data':
+                print(line)
+                reg = re.search('((\d{2,4})[./\\-](\d{2,4})[./\\-](\d{2,4}))', line)
+                props['data'] = "-".join(reg.groups()[1:])
+            elif label == 'cui':
+                props['cui'] = "RO"+str(reg.groups()[0])
             elif label == 'address':
                 props[label] += line
             elif label in ['price', 'name']:
