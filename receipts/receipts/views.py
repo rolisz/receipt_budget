@@ -70,11 +70,11 @@ def import_csv(request):
             date = parse(kv['date'], dayfirst=True)
             print(s)
             exp = s.expense_set.create(date=date, user=request.user)
-            price = re.match("(\d+([.,]\d+))", kv['price'])
+            price = re.match("(\d+([.,]\d+)?)", kv['price'])
             if not price:
                 print("Invalid price %s" % kv['price'])
                 continue
-            price = price.groups()[0]
+            price = price.groups()[0].replace(',', '.')
             exp.expenseitem_set.create(name=kv['item'], price=price)
 
         return HttpResponse("Success!")

@@ -11,7 +11,8 @@
             <li><a href="/dashboard/graph">Chart</a></li>
         </ul>
     </div>
-    <span id="date"></span>
+    Date: <div id="date"></div>
+    Spent: <div id="daily_total"></div>
     <button id="play">Play</button>
     <div id="map"></div>
     <div id="slider"></div>
@@ -86,6 +87,9 @@ function set_map(i, animate) {
     heatmap.setOptions({radius: 40, opacity: 0.7});
     heatmap.setMap(map);
     d3.select('#date').text(ts.invert(i).toDateString());
+    d3.select('#daily_total').text(d3.sum(all_data[i][1], function(e) {
+        return e.total;})
+    );
     if (animate && i < all_data.length) {
 
          time_out = setTimeout(function() {

@@ -2,6 +2,7 @@ from itertools import izip_longest
 import re
 import string
 from SimpleCV import Image
+from joblib import Parallel, delayed
 from line import Line
 import numpy as np
 
@@ -145,12 +146,12 @@ class Receipt:
         """
         Analyze each line
         """
-        for line in self.lines:
-            line.analyze()
-            line.readLetters()
-            self.nimg.drawText(" ".join(map(lambda x:x[0],line.letters)), 10, line.beginY)
-        self.img = self.img.applyLayers()
-        self.nimg = self.nimg.applyLayers().getNumpy().transpose([1, 0, 2])
+        nr = 6
+        a = Parallel(n_jobs=nr)(delayed(parallel)(lines) for lines in chunks(self.lines, len(self.lines)/nr))
+        self.lines = []
+        for l in a:
+            print(l)
+            self.lines.extend(l)
 
     def analyze_text(self):
         """
@@ -168,6 +169,7 @@ class Receipt:
                 reg = re.search('((\d{2,4})[./\\-](\d{2,4})[./\\-](\d{2,4}))', line)
                 props['data'] = "-".join(reg.groups()[1:])
             elif label == 'cui':
+                reg = re.search('(\d{4,})', line)
                 props['cui'] = "RO"+str(reg.groups()[0])
             elif label == 'address':
                 props[label] += line
@@ -251,3 +253,20 @@ class Receipt:
                 else:
                     labels.append('unknown')
         return labels
+
+
+def chunks(l, n):
+    """ Yield successive n-sized chunks from l.
+    """
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+
+
+def parallel(lines):
+    """
+    Helper for using multiproccesing for parallel execution
+    """
+    for line in lines:
+        line.analyze()
+        line.readLetters()
+    return lines

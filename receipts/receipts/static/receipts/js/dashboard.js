@@ -17,6 +17,7 @@ $.getJSON("/rest/expenses/all.json", function (data) {
     data.forEach(function (d) {
         d.dd = dateFormat.parse(d.date);
         d.month = d3.time.month(d.dd); // pre-calculate month for better performance
+        d.day = d3.time.day(d.dd); // pre-calculate month for better performance
         d.total = +d.total; // coerce to number
     });
 
@@ -59,7 +60,7 @@ $.getJSON("/rest/expenses/all.json", function (data) {
 
     // dimension by month
     var moveMonths = ndx.dimension(function (d) {
-        return d.month;
+        return d.day;
     });
     // group by total movement within month
     var monthlyMoveGroup = moveMonths.group().reduceSum(function (d) {
@@ -178,7 +179,7 @@ $.getJSON("/rest/expenses/all.json", function (data) {
         .mouseZoomable(true)
         // Specify a range chart to link the brush extent of the range with the zoom focue of the current chart.
         .rangeChart(volumeChart)
-        .x(d3.time.scale().domain([new Date(2012, 0, 1), new Date(2013, 11, 31)]))
+        .x(d3.time.scale().domain([new Date(2013, 0, 1), new Date(2013, 9, 31)]))
         .round(d3.time.month.round)
         .xUnits(d3.time.months)
         .elasticY(true)

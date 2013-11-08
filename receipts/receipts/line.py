@@ -1,7 +1,7 @@
 import cPickle
 from itertools import tee, izip
 import os
-from SimpleCV import Image
+from joblib import load
 from django.conf import settings
 import numpy as np
 
@@ -9,14 +9,9 @@ __author__ = 'Roland'
 
 size = 10
 
-f = open(os.path.join(settings.PICKLE_ROOT, "seg_model.pkl"), "rb")
-model = cPickle.load(f)
-print(model)
-f.close()
+model = load(os.path.join(settings.PICKLE_ROOT, "joblib_seg.jb"))
 
-f = open(os.path.join(settings.PICKLE_ROOT, "seg_letter_model.pkl"), "rb")
-logistic_model = cPickle.load(f)
-f.close()
+logistic_model = load(os.path.join(settings.PICKLE_ROOT, "joblib_letter.jb"))
 
 f = open(os.path.join(settings.PICKLE_ROOT, "label_encoder.pkl"), "rb")
 labels = cPickle.load(f)

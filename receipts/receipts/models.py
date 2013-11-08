@@ -81,10 +81,13 @@ def my_handler(sender, instance, **kwargs):
     try:
         obj = Shop.objects.get(pk=instance.pk)
     except Shop.DoesNotExist:
-        obj = namedtuple('Shop', ['address', 'lat', 'lon'])
-        obj.address = ""
-        obj.lat = ""
-        obj.lon = ""
+        try:
+            address, (latitude, longitude) = geolocator.geocode(instance.address, exactly_one=False)[0]
+            instance.lat = latitude
+            instance.lon = longitude
+        except GQueryError:
+            pass
+        return
     if obj.address != instance.address:
         if instance.address not in ["", "unknown"]:
             try:
