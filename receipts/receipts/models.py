@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from geopy.geocoders import GoogleV3
-from geopy.geocoders.googlev3 import GQueryError
+from geopy.geocoders.googlev3 import GeocoderQueryError
 
 
 class UserExpenseManager(models.Manager):

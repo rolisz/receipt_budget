@@ -1,46 +1,47 @@
 from itertools import izip_longest
 import re
 import string
-from SimpleCV import Image
+# from SimpleCV import Image
 from joblib import Parallel, delayed
 from line import Line
 import numpy as np
+import cv2
+from utils import resize, rotate
 
 __author__ = 'Roland'
 
 count = lambda l1, l2: len(list(filter(lambda c: c in l2, l1)))
 days = ['luni', 'marti', 'miercuri', 'joi', 'vineri', 'sambata', 'duminica']
 
+
 class Receipt:
 
     def __init__(self, img):
         if isinstance(img, basestring):
-            img = Image(str(img))
-        self.img = img
+            img = cv2.imread(img)
+        self.img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # do binarization on smaller parts of the image, then join them back together
         # should help with varied ilumination
-        imgs = img.split(1, 8)
-        bin_imgs = []
-        for img in imgs:
-            bin_imgs.append(img[0].binarize())
-        print(bin_imgs)
-        img = bin_imgs[0]
-        for i in range(1, len(bin_imgs)):
-            img = img.sideBySide(bin_imgs[i], side='bottom')
-        self.img = img
-        self.dimg = img.copy()
-        self.nimg = Image(img.size())
+        self.img = cv2.adaptiveThreshold(self.img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+            cv2.THRESH_BINARY,11,2)
+
+        self.dimg = self.img.copy()
+        self.nimg = np.zeros(img.shape)
         self.straighten()
         self.cleanEdges()
         self.findLines()
-        self.readBlobs()
+        #self.readBlobs()
 
     def straighten(self, stepsize=3, low_angle=-5, high_angle=5):
-        origWidth = self.img.width
+        # width is shape[1], height is shape[0]
+        cv2.imwrite("before.jpg", self.img)
+        origWidth = self.img.shape[1]
         if low_angle < -20 or high_angle > 20:
             raise Exception("Photo is too skewed. Please straighten photo before trying to process it")
-        img = self.img.resize(w=600)         # for some reason, straightening works better at this width :-??
+
+
+        img = resize(self.img, width=600)         # for some reason, straightening works better at this width :-??
 
         # straighten out images
         # using histograms: rotate +-5 in .3 steps, get max of each histogram
@@ -49,10 +50,11 @@ class Receipt:
         simg = img
         hists = []
         rng = list(range(low_angle*stepsize, high_angle*stepsize))
-        bincount = 600 if img.height > 600 else img.height
+        bincount = 600 if img.shape[0] > 600 else img.shape[0]
         for ang in rng:
-            pimg = simg.rotate(ang/float(stepsize), fixed=True)
-            hist = pimg.horizontalHistogram(bincount)
+            pimg = rotate(simg, ang/float(stepsize), fixed=False) # was true, but doesn't make sense and doens't work
+            # pimg = rotate(simg, ang/float(stepsize))
+            hist, _ = np.histogram(pimg.sum(axis=1), bincount)
             hists.append(max(hist))
         rot = np.argmax(hists)
 
@@ -62,11 +64,12 @@ class Receipt:
             self.straighten(low_angle=low_angle-5, high_angle=high_angle-5)
         elif rot == len(rng) - 1:
             self.straighten(low_angle=low_angle+5, high_angle=high_angle+5)
-        img = self.img.rotate(rng[rot]/float(stepsize), fixed=True)   # otsu's method removes
-                                                                            # background noise better
+        img = rotate(self.img, rng[rot]/float(stepsize), fixed=False)   # otsu's method removes
+                                                                          # background noise better
 
         # self.img = img.resize(w=origWidth//2)        # so that all letters are small enough
-        self.img = img.resize(w=600)                                             # maybe I should look at average size of a blob ?
+        self.img = resize(img, width=600)              # maybe I should look at average size of a blob ?
+        cv2.imwrite("after_straight.jpg", self.img)
 
     def cleanEdges(self, low_thresh=300, line_range=100, consec_lines=10, line_thresh=500, padding=10):
         # remove horizontal edges (blank lines and eventual artifacts such as receipt edge)
@@ -75,16 +78,18 @@ class Receipt:
         # and add 10 px padding
         # or if more then 30% of pixels are all white
         # same for end
-        self.gnmp = self.img.getGrayNumpy()
-        verticalProj = self.gnmp.sum(axis=1)
+        self.gnmp = 255 - self.img.copy()
+        verticalProj = self.gnmp.sum(axis=0)
+        print verticalProj, verticalProj.shape
         begin = 0
         end = 0
-        upper_thresh = self.img.height * 255 * 0.3 * 10
+        upper_thresh = self.img.shape[0] * 255 * 0.3 * 10
         for i, p in enumerate(verticalProj):
             if begin == 0 and p > low_thresh:
                 found = False
                 for j in range(10, line_range):
                     s = sum(verticalProj[i+j:i+j+consec_lines])
+                    # print s, line_thresh, upper_thresh
                     if s < line_thresh or s > upper_thresh:
                         found = True
                         break
@@ -99,6 +104,7 @@ class Receipt:
                 found = False
                 for j in range(10, line_range):
                     s = sum(verticalProj[i - j:i-j+consec_lines])
+                    # print s, line_thresh, upper_thresh
                     if s < line_thresh or s > upper_thresh:
                         found = True
                         break
@@ -109,48 +115,53 @@ class Receipt:
 
         if self.gnmp.sum(axis=0).mean() > 15000:
             begin = max(20, begin)
-            end = min(self.img.width - 20, end)
+            end = min(self.img.shape[1] - 20, end)
         else:
             begin = max(0, begin)
-            end = min(self.img.width, end)
+            end = min(self.img.shape[1], end)
         begin = 0 if begin < 0 else begin
-        end = self.img.width if end > self.img.width else end
-
-        self.img = self.img.crop(begin, 0, end - begin, self.img.height)
-        self.gnmp = self.img.getGrayNumpy()
+        end = self.img.shape[1] if end > self.img.shape[1] else end
+        print 'aaaa',begin, end, 0, self.img.shape
+        self.img = self.img[begin:end, 0:self.img.shape[1]]
+        cv2.imwrite("./after_clean.jpg", self.img)
+        self.gnmp = self.img.copy()
         self.dimg = self.img.copy()
 
     def findLines(self, line_beg=0, line_end=0, thresh=2000, padding=2):
         # find lines
+        print self.gnmp.shape
         horizProj = self.gnmp.sum(axis=0)
 
         mean = np.mean(horizProj)
         if mean > thresh * 5:
             thresh = np.mean(horizProj[200:-200])
         self.lines = []
+        print horizProj
         for i, p in enumerate(horizProj):
             if p > thresh and line_beg == 0:
                 line_beg = i - padding
             if line_beg != 0 and p < thresh:
                 line_end = i + padding
                 if line_end - line_beg > 15:
-                    self.lines.append(Line(line_beg, line_end, self.dimg.crop(0, line_beg, self.img.width,
-                                                                              line_end - line_beg)))
+                    cv2.imwrite("tmp\\line %d.jpg" % i, self.dimg[line_beg:line_end, 0:self.img.shape[1]])
+                    self.lines.append(Line(line_beg, line_end,
+                                      self.dimg[line_beg:line_end, 0:self.img.shape[1]]))
                 line_beg = 0
-
-        for line in self.lines:
-            if line.endY - line.beginY > 15:
-                self.img.drawRectangle(1, line.beginY, self.img.width - 2, line.endY - line.beginY)
+        print self.lines
+        # for line in self.lines:
+        #     if line.endY - line.beginY > 15:
+        #         self.img.drawRectangle(1, line.beginY, self.img.width - 2, line.endY - line.beginY)
 
     def readBlobs(self):
         """
         Analyze each line
         """
         nr = 6
-        a = Parallel(n_jobs=nr)(delayed(parallel)(lines) for lines in chunks(self.lines, len(self.lines)/nr))
+        a = Parallel(n_jobs=nr)(delayed(parallel)(lines)
+                                for lines in chunks(self.lines, len(self.lines)/nr))
         self.lines = []
         for l in a:
-            print(l)
+            print(l[0].getLine())
             self.lines.extend(l)
 
     def analyze_text(self):
@@ -270,3 +281,11 @@ def parallel(lines):
         line.analyze()
         line.readLetters()
     return lines
+
+if __name__ == "__main__":
+    import os
+    if os.name == 'posix':
+        img = Receipt("../../bons/bon1.jpg")
+    else:
+        img = Receipt("D:\\AI\\receipt_budget\\bons\\bon1.jpg")
+

@@ -5,7 +5,7 @@ import json
 import os
 import string
 import random
-from SimpleCV import Image
+# from SimpleCV import Image
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required

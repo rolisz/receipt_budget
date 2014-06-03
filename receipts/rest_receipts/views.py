@@ -65,7 +65,7 @@ def delete(request, id):
 def index(request):
     print(request.user)
     expenses = Expense.objects.for_user(request.user).all()
-    l = listify(expenses)
+    l = listify(expenses, True)
     return JsonResponse(l)
 
 
@@ -76,7 +76,7 @@ def expense_list_json(request, type):
 
     if type == 'all':
         expenses = expenses.all()
-        groups = listify(expenses)
+        groups = listify(expenses, True)
     elif type == 'place':
         shops = Shop.objects.filter(lat__isnull=False, lon__isnull=False).annotate(Sum('expense__expenseitem__price'))
         groups = []
@@ -88,14 +88,18 @@ def expense_list_json(request, type):
         for k, g in groupby(expenses, lambda x: x.date):
             groups.append((str(k), listify(g)))
     else:
-        JsonError("Invalid request")
+        return JsonError("Invalid request")
     return JsonResponse(groups)
 
 
-def listify(expenses):
+def listify(expenses, items=False):
     listified = []
     for exp in expenses:
         expense = {'id': exp.id, 'shop': str(exp.shop.name), 'lat': exp.shop.lat, 'lon': exp.shop.lon,
-                   'total': exp.total, 'date': str(exp.date)}
+                   'total': str(exp.total), 'date': str(exp.date)}
+        if items:
+            expense['items'] = []
+            for it in exp.expenseitem_set.all():
+                expense['items'].append({'name': it.name, 'price': str(it.price), 'id': it.id})
         listified.append(expense)
     return listified
