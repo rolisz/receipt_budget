@@ -1,7 +1,6 @@
 from itertools import izip_longest
 import re
 import string
-# from SimpleCV import Image
 from joblib import Parallel, delayed
 from line import Line
 import numpy as np
@@ -21,21 +20,21 @@ class Receipt:
             img = cv2.imread(img)
         self.img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # do binarization on smaller parts of the image, then join them back together
-        # should help with varied ilumination
-        self.img = cv2.adaptiveThreshold(self.img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-            cv2.THRESH_BINARY,11,2)
 
+        #self.img = cv2.adaptiveThreshold(self.img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+        #    cv2.THRESH_BINARY_INV,11,2)
+        ret_val, self.img = cv2.threshold(self.img, -1, float(255), cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            
         self.dimg = self.img.copy()
         self.nimg = np.zeros(img.shape)
         self.straighten()
         self.cleanEdges()
         self.findLines()
-        #self.readBlobs()
+        self.readBlobs()
 
     def straighten(self, stepsize=3, low_angle=-5, high_angle=5):
         # width is shape[1], height is shape[0]
-        cv2.imwrite("before.jpg", self.img)
+        cv2.imwrite("tmp//before.jpg", self.img)
         origWidth = self.img.shape[1]
         if low_angle < -20 or high_angle > 20:
             raise Exception("Photo is too skewed. Please straighten photo before trying to process it")
@@ -52,8 +51,9 @@ class Receipt:
         rng = list(range(low_angle*stepsize, high_angle*stepsize))
         bincount = 600 if img.shape[0] > 600 else img.shape[0]
         for ang in rng:
-            pimg = rotate(simg, ang/float(stepsize), fixed=False) # was true, but doesn't make sense and doens't work
+            pimg = rotate(simg, ang/float(stepsize), fixed=True) # was true, but doesn't make sense and doens't work
             # pimg = rotate(simg, ang/float(stepsize))
+            # cv2.imwrite("tmp//rotate %d.jpg" % ang, pimg)
             hist, _ = np.histogram(pimg.sum(axis=1), bincount)
             hists.append(max(hist))
         rot = np.argmax(hists)
@@ -69,7 +69,7 @@ class Receipt:
 
         # self.img = img.resize(w=origWidth//2)        # so that all letters are small enough
         self.img = resize(img, width=600)              # maybe I should look at average size of a blob ?
-        cv2.imwrite("after_straight.jpg", self.img)
+        cv2.imwrite("tmp//after_straight.jpg", self.img)
 
     def cleanEdges(self, low_thresh=300, line_range=100, consec_lines=10, line_thresh=500, padding=10):
         # remove horizontal edges (blank lines and eventual artifacts such as receipt edge)
@@ -78,7 +78,7 @@ class Receipt:
         # and add 10 px padding
         # or if more then 30% of pixels are all white
         # same for end
-        self.gnmp = 255 - self.img.copy()
+        self.gnmp = self.img.copy()
         verticalProj = self.gnmp.sum(axis=0)
         print verticalProj, verticalProj.shape
         begin = 0
@@ -122,15 +122,15 @@ class Receipt:
         begin = 0 if begin < 0 else begin
         end = self.img.shape[1] if end > self.img.shape[1] else end
         print 'aaaa',begin, end, 0, self.img.shape
-        self.img = self.img[begin:end, 0:self.img.shape[1]]
-        cv2.imwrite("./after_clean.jpg", self.img)
+        self.img = self.img[:, begin:end]
+        cv2.imwrite("tmp//after_clean.jpg", self.img)
         self.gnmp = self.img.copy()
         self.dimg = self.img.copy()
 
     def findLines(self, line_beg=0, line_end=0, thresh=2000, padding=2):
         # find lines
         print self.gnmp.shape
-        horizProj = self.gnmp.sum(axis=0)
+        horizProj = self.gnmp.sum(axis=1)
 
         mean = np.mean(horizProj)
         if mean > thresh * 5:
@@ -287,5 +287,7 @@ if __name__ == "__main__":
     if os.name == 'posix':
         img = Receipt("../../bons/bon1.jpg")
     else:
-        img = Receipt("D:\\AI\\receipt_budget\\bons\\bon1.jpg")
+        img = Receipt("D:\\AI\\Bonuri\\bonuri\\bon1.jpg")
+        img.analyze_text()
+        print img.props
 
