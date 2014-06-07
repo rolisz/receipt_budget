@@ -65,7 +65,7 @@ class Line:
                 pred = 1
             if all_black and nimg[:, i].sum() > 50:
                 all_black = False
-            cv2.imwrite("tmp\\seg %d %s.jpg" % (i, pred), mimg.reshape((20,20)))
+            #cv2.imwrite("tmp\\seg %d %s.jpg" % (i, pred), mimg.reshape((20,20)))
             if pred == 1:
                 true_query.append((i - size, probabilities[1], all_black))
                 all_black = True
@@ -106,7 +106,7 @@ class Line:
                 lett = resize(lett, width=30)
             if lett.shape[0] > 0 and lett.shape[1] > 0 :
                 lett = embiggen(lett, (30, 30))
-                cv2.imwrite("tmp\\char %d %s.jpg" % (i, "r"), lett)
+                # cv2.imwrite("tmp\\char %d %s.jpg" % (i, "r"), lett)
                 letters.append(lett.reshape(-1))
             i += 1
         try:
