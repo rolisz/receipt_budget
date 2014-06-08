@@ -3,7 +3,26 @@ from itertools import tee, izip
 import os
 from joblib import load
 import cv2
-# from django.conf import settings
+import sys
+print(sys.version)
+try:
+    from django.conf import settings
+    model = load(os.path.join(settings.PICKLE_ROOT, "joblib_seg.jb"))
+
+    logistic_model = load(os.path.join(settings.PICKLE_ROOT, "joblib_letter.jb"))
+
+    f = open(os.path.join(settings.PICKLE_ROOT, "label_encoder.pkl"), "rb")
+    labels = cPickle.load(f)
+    f.close()
+except Exception as e:
+    print e
+    model = cPickle.load(open("D:/AI/receipt_budget/receipts/receipts/ml_models/test_seg_model.pkl", "rb"))
+
+    logistic_model = load("D:/AI/receipt_budget/receipts/receipts/ml_models/joblib_letter.jb")
+
+    f = open("D:/AI/receipt_budget/receipts/receipts/ml_models/label_encoder.pkl", "rb")
+    labels = cPickle.load(f)
+    f.close()
 import numpy as np
 from utils import resize, rotate, embiggen 
 
@@ -12,13 +31,7 @@ __author__ = 'Roland'
 size = 10
 
 # model = load("./ml_models/joblib_seg.jb", "rb")
-model = cPickle.load(open("./ml_models/test_seg_model.pkl", "rb"))
 
-logistic_model = load("./ml_models/joblib_letter.jb")
-
-f = open("./ml_models/label_encoder.pkl", "rb")
-labels = cPickle.load(f)
-f.close()
 
 
 def pairwise(iterable):

@@ -81,7 +81,7 @@ def expense_list_json(request, type):
         shops = Shop.objects.filter(lat__isnull=False, lon__isnull=False).annotate(Sum('expense__expenseitem__price'))
         groups = []
         for shop in shops:
-            groups.append((shop.name, shop.lat, shop.lon, shop.expense__expenseitem__price__sum))
+            groups.append((shop.name, shop.lat, shop.lon, str(shop.expense__expenseitem__price__sum)))
     elif type == 'day':
         expenses = expenses.order_by('date').all()
         groups = []

@@ -28,17 +28,17 @@ class Receipt:
         #    cv2.THRESH_BINARY_INV,11,2)
         ret_val, self.img = cv2.threshold(self.img, -1, float(255), cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
             
-        cv2.imwrite("tmp//binarized.jpg", self.img)
+        #cv2.imwrite("tmp//binarized.jpg", self.img)
         self.dimg = self.img.copy()
         self.nimg = np.zeros(img.shape)
         self.straighten()
         self.cleanEdges()
         self.findLines()
-        #self.readBlobs()
+        self.readBlobs()
 
     def straighten(self, stepsize=3, low_angle=-5, high_angle=5):
         # width is shape[1], height is shape[0]
-        cv2.imwrite("tmp//before.jpg", self.img)
+        #cv2.imwrite("tmp//before.jpg", self.img)
         origWidth = self.img.shape[1]
         if low_angle < -20 or high_angle > 20:
             raise Exception("Photo is too skewed. Please straighten photo before trying to process it")
@@ -59,9 +59,9 @@ class Receipt:
             # pimg = rotate(simg, ang/float(stepsize))
             # cv2.imwrite("tmp//rotate %d.jpg" % ang, pimg)
             hist, _ = np.histogram(pimg.sum(axis=1), bincount)
-            plt.plot(hist)
-            plt.savefig('tmp//hist %d.png' % ang, bbox_inches='tight')
-            plt.close()
+            #plt.plot(hist)
+            #plt.savefig('tmp//hist %d.png' % ang, bbox_inches='tight')
+            #plt.close()
             hists.append(max(hist))
         rot = np.argmax(hists)
 
@@ -76,7 +76,7 @@ class Receipt:
 
         # self.img = img.resize(w=origWidth//2)        # so that all letters are small enough
         self.img = resize(img, width=600)              # maybe I should look at average size of a blob ?
-        cv2.imwrite("tmp//straight.jpg", self.img)
+        #cv2.imwrite("tmp//straight.jpg", self.img)
 
     def cleanEdges(self, low_thresh=300, line_range=100, consec_lines=10, line_thresh=500, padding=10):
         # remove horizontal edges (blank lines and eventual artifacts such as receipt edge)
@@ -87,9 +87,9 @@ class Receipt:
         # same for end
         self.gnmp = self.img.copy()
         verticalProj = self.gnmp.sum(axis=0)
-        plt.plot(verticalProj)
-        plt.savefig('tmp//edges.png', bbox_inches='tight')
-        plt.close()
+        #plt.plot(verticalProj)
+        #plt.savefig('tmp//edges.png', bbox_inches='tight')
+        #plt.close()
         print verticalProj, verticalProj.shape
         begin = 0
         end = 0
@@ -133,7 +133,7 @@ class Receipt:
         end = self.img.shape[1] if end > self.img.shape[1] else end
         print 'aaaa',begin, end, 0, self.img.shape
         self.img = self.img[:, begin:end]
-        cv2.imwrite("tmp//cleaned.jpg", self.img)
+        #cv2.imwrite("tmp//cleaned.jpg", self.img)
         self.gnmp = self.img.copy()
         self.dimg = self.img.copy()
 
@@ -142,9 +142,9 @@ class Receipt:
         print self.gnmp.shape
         horizProj = self.gnmp.sum(axis=1)
 
-        plt.plot(horizProj)
-        plt.savefig('tmp//lines.png', bbox_inches='tight')
-        plt.close()
+        #plt.plot(horizProj)
+        #plt.savefig('tmp//lines.png', bbox_inches='tight')
+        #plt.close()
         mean = np.mean(horizProj)
         if mean > thresh * 5:
             thresh = np.mean(horizProj[200:-200])
@@ -156,7 +156,7 @@ class Receipt:
             if line_beg != 0 and p < thresh:
                 line_end = i + padding
                 if line_end - line_beg > 15:
-                    cv2.imwrite("tmp\\line %d.jpg" % i, self.dimg[line_beg:line_end, 0:self.img.shape[1]])
+                    #cv2.imwrite("tmp\\line %d.jpg" % i, self.dimg[line_beg:line_end, 0:self.img.shape[1]])
                     self.lines.append(Line(line_beg, line_end,
                                       self.dimg[line_beg:line_end, 0:self.img.shape[1]]))
                 line_beg = 0
@@ -301,6 +301,7 @@ if __name__ == "__main__":
         img = Receipt("../../bons/bon1.jpg")
     else:
         img = Receipt("D:\\AI\\Bonuri\\bonuri\\bon1.jpg")
-        #img.analyze_text()
-        #print img.props
+        img.analyze_text()
+        with open("tmp.txt", "wb") as f:
+            f.writelines([x.getLine()+"\n" for x in img.lines])
 

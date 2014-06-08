@@ -41,9 +41,10 @@ var map = new google.maps.Map($("#map")[0], {
 // Load the station data. When the data comes back, create an overlay.
 $.getJSON("/rest/expenses/place.json", function(data) {
     var points = $.map(data, function(val, i) {
-        console.log(val)
-        return {location: new google.maps.LatLng(val[1], val[2]), weight: val[3]}
+        
+        return {location: new google.maps.LatLng(val[1], val[2]), weight: val[3]*1}
     });
+    console.log(points)
     var heatmap = new google.maps.visualization.HeatmapLayer({
       data: points
     });

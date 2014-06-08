@@ -5,7 +5,7 @@ import json
 import os
 import string
 import random
-# from SimpleCV import Image
+import cv2
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -103,11 +103,11 @@ def upload_webcam(request):
     img_data = img_string.decode("base64")
     f.write(img_data)
     f.close()
-    img = Image(path)
-    coords = [(int(request.POST['x1']), int(request.POST['y1'])),
-              (int(request.POST['x2']), int(request.POST['y2']))]
-    img = img.crop(*coords)
-    img.save(path)
+    img = cv2.imread(path)
+    x1, y1, x2, y2 = (int(request.POST['x1']), int(request.POST['y1']),
+                      int(request.POST['x2']), int(request.POST['y2']))
+    img = img[y1:y2, x1:x2]
+    cv2.imwrite(path, img)
     try:
         exp = Expense.from_receipt(path, request.user)
         return redirect(reverse('admin:receipts_expense_change', args=(exp.id,)))
